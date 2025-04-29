@@ -63,6 +63,43 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
     return allSteps;
   };
 
+  // Helper function to count platforms
+  const getPlatformCounts = () => {
+    const platforms: Record<string, number> = {};
+    
+    data.host_group.forEach(host => {
+      const platform = host.platform;
+      platforms[platform] = (platforms[platform] || 0) + 1;
+    });
+    
+    return platforms;
+  };
+
+  // Helper function to count commands by status per platform
+  const getCommandsByPlatform = () => {
+    const platformStats: Record<string, { successful: number; failed: number }> = {};
+    
+    Object.entries(data.steps).forEach(([paw, hostSteps]) => {
+      const host = data.host_group.find(h => h.paw === paw);
+      if (host) {
+        const platform = host.platform;
+        if (!platformStats[platform]) {
+          platformStats[platform] = { successful: 0, failed: 0 };
+        }
+        
+        hostSteps.steps.forEach(step => {
+          if (step.status === 0) {
+            platformStats[platform].successful++;
+          } else {
+            platformStats[platform].failed++;
+          }
+        });
+      }
+    });
+    
+    return platformStats;
+  };
+
   const generatePDF = async () => {
     toast({
       title: "Generating PDF Report",
@@ -105,10 +142,20 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         (acc, hostSteps) => acc + hostSteps.steps.length, 0
       );
       pdf.text(`Total Commands Executed: ${totalCommands}`, 20, 140);
+      
+      const { successful, failed } = getCommandStats();
+      pdf.text(`Success Rate: ${Math.round((successful / totalCommands) * 100)}%`, 20, 150);
 
-      pdf.text(`Planner: ${data.planner}`, 20, 160);
-      pdf.text(`Adversary: ${data.adversary.name}`, 20, 170);
-      pdf.text(`Adversary Description: ${data.adversary.description}`, 20, 180);
+      pdf.text(`Planner: ${data.planner}`, 20, 170);
+      pdf.text(`Adversary: ${data.adversary.name}`, 20, 180);
+      
+      // Footer
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.text(`CONFIDENTIAL - Reconnaissance Report - Page 1`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
       
       // ----- Executive Summary Page -----
       pdf.addPage();
@@ -131,7 +178,6 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       pdf.text(`A total of ${data.host_group.length} hosts were compromised and ${totalCommands} commands were executed.`, 20, 56);
       
       // Command success/failure stats
-      const { successful, failed } = getCommandStats();
       pdf.setFont('helvetica', 'bold');
       pdf.text("Command Execution Summary", 20, 75);
       pdf.setFont('helvetica', 'normal');
@@ -139,18 +185,257 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       pdf.text(`Failed Commands: ${failed}`, 30, 95);
       pdf.text(`Success Rate: ${Math.round((successful / totalCommands) * 100)}%`, 30, 105);
       
-      // Create simple bar chart for command success/failure
+      // Create bar chart for command success/failure
       pdf.setDrawColor(0);
-      pdf.setFillColor(39, 174, 96);
+      pdf.setFillColor(39, 174, 96); // Green color for success
       const successBarWidth = (successful / totalCommands) * 100;
       pdf.rect(30, 115, successBarWidth, 10, 'F');
       
-      pdf.setFillColor(231, 76, 60);
+      pdf.setFillColor(231, 76, 60); // Red color for failure
       pdf.rect(30 + successBarWidth, 115, 100 - successBarWidth, 10, 'F');
       
       pdf.text("Successful", 30, 135);
-      pdf.text("Failed", 80, 135);
-
+      pdf.text("Failed", 90, 135);
+      
+      // Add a donut chart for platforms
+      const platforms = getPlatformCounts();
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Platforms Distribution", 20, 155);
+      pdf.setFont('helvetica', 'normal');
+      
+      // Draw donut chart for platforms
+      const centerX = 80;
+      const centerY = 180;
+      const outerRadius = 25;
+      const innerRadius = 15;
+      
+      const colors = ['#3498db', '#9b59b6', '#e74c3c', '#f1c40f', '#2ecc71'];
+      let startAngle = 0;
+      let i = 0;
+      
+      const platformLabels: [string, number, number][] = [];
+      const total = Object.values(platforms).reduce((sum, count) => sum + count, 0);
+      
+      Object.entries(platforms).forEach(([platform, count]) => {
+        const angle = (count / total) * 360;
+        const endAngle = startAngle + angle;
+        
+        // Convert angles to radians for drawing
+        const startRad = (startAngle * Math.PI) / 180;
+        const endRad = (endAngle * Math.PI) / 180;
+        
+        // Draw outer arc
+        pdf.setFillColor(colors[i % colors.length]);
+        
+        // Draw the segment
+        pdf.setLineWidth(0.1);
+        pdf.setDrawColor(255, 255, 255);
+        
+        // We need to draw the arc manually since jsPDF doesn't have built-in arc/segment drawing
+        const segments = 60; // number of segments to approximate the arc
+        const angleStep = (endRad - startRad) / segments;
+        
+        // Outer arc
+        pdf.moveTo(
+          centerX + outerRadius * Math.cos(startRad),
+          centerY + outerRadius * Math.sin(startRad)
+        );
+        
+        for (let j = 1; j <= segments; j++) {
+          const currentAngle = startRad + j * angleStep;
+          pdf.lineTo(
+            centerX + outerRadius * Math.cos(currentAngle),
+            centerY + outerRadius * Math.sin(currentAngle)
+          );
+        }
+        
+        // Line to inner circle
+        pdf.lineTo(
+          centerX + innerRadius * Math.cos(endRad),
+          centerY + innerRadius * Math.sin(endRad)
+        );
+        
+        // Inner arc (counter-clockwise)
+        for (let j = segments; j >= 0; j--) {
+          const currentAngle = startRad + j * angleStep;
+          pdf.lineTo(
+            centerX + innerRadius * Math.cos(currentAngle),
+            centerY + innerRadius * Math.sin(currentAngle)
+          );
+        }
+        
+        pdf.fill();
+        
+        // Calculate position for label
+        const middleAngle = startRad + (endRad - startRad) / 2;
+        const labelRadius = outerRadius + 10;
+        const labelX = centerX + labelRadius * Math.cos(middleAngle);
+        const labelY = centerY + labelRadius * Math.sin(middleAngle);
+        
+        platformLabels.push([platform, labelX, labelY]);
+        
+        startAngle = endAngle;
+        i++;
+      });
+      
+      // Add platform labels
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      platformLabels.forEach(([platform, x, y], idx) => {
+        pdf.setFillColor(colors[idx % colors.length]);
+        pdf.rect(150, 170 + idx * 10, 5, 5, 'F');
+        pdf.text(`${platform}`, 160, 174 + idx * 10);
+      });
+      
+      // Footer
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.text(`CONFIDENTIAL - Reconnaissance Report - Page 2`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+      
+      // ----- Detailed Statistics Page -----
+      pdf.addPage();
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(16);
+      pdf.text("Detailed Statistics", 20, 15);
+      
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Command Execution by Platform", 20, 35);
+      
+      // Command execution by platform stats
+      const platformStats = getCommandsByPlatform();
+      const platformKeys = Object.keys(platformStats);
+      
+      // Horizontal bar chart showing command execution by platform
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      
+      const barHeight = 12;
+      const gap = 5;
+      const startY = 50;
+      const barMaxWidth = 120;
+      
+      // Find the maximum value for scaling
+      const maxCommands = Math.max(...platformKeys.map(platform => 
+        platformStats[platform].successful + platformStats[platform].failed
+      ));
+      
+      platformKeys.forEach((platform, idx) => {
+        const y = startY + idx * (barHeight + gap * 2);
+        const stats = platformStats[platform];
+        const total = stats.successful + stats.failed;
+        
+        // Platform label
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(platform, 20, y);
+        pdf.setFont('helvetica', 'normal');
+        
+        // Total count
+        pdf.text(`${total}`, 185, y);
+        
+        // Success bar
+        pdf.setFillColor(39, 174, 96);
+        const successWidth = (stats.successful / maxCommands) * barMaxWidth;
+        pdf.rect(50, y + 2, successWidth, barHeight / 2 - 1, 'F');
+        
+        // Failure bar
+        pdf.setFillColor(231, 76, 60);
+        const failedWidth = (stats.failed / maxCommands) * barMaxWidth;
+        pdf.rect(50, y + barHeight / 2 + 1, failedWidth, barHeight / 2 - 1, 'F');
+      });
+      
+      // Legend
+      pdf.setFillColor(39, 174, 96);
+      pdf.rect(50, startY + platformKeys.length * (barHeight + gap * 2) + 10, 10, 5, 'F');
+      pdf.text("Successful", 65, startY + platformKeys.length * (barHeight + gap * 2) + 15);
+      
+      pdf.setFillColor(231, 76, 60);
+      pdf.rect(110, startY + platformKeys.length * (barHeight + gap * 2) + 10, 10, 5, 'F');
+      pdf.text("Failed", 125, startY + platformKeys.length * (barHeight + gap * 2) + 15);
+      
+      // Tactic distribution
+      const tactics = getTacticStats();
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Tactic Distribution", 20, startY + platformKeys.length * (barHeight + gap * 2) + 30);
+      
+      // Create pie chart for tactics
+      const tacticCenterX = 100;
+      const tacticCenterY = startY + platformKeys.length * (barHeight + gap * 2) + 70;
+      const tacticRadius = 30;
+      
+      const tacticColors = ['#2ecc71', '#3498db', '#9b59b6', '#e74c3c', '#f1c40f', '#1abc9c', '#e67e22', '#34495e'];
+      let tacticStartAngle = 0;
+      let t = 0;
+      
+      const tacticLabels: [string, number, number, number][] = [];
+      const tacticTotal = Object.values(tactics).reduce((sum, count) => sum + count, 0);
+      
+      Object.entries(tactics).forEach(([tactic, count]) => {
+        const angle = (count / tacticTotal) * 360;
+        const endAngle = tacticStartAngle + angle;
+        
+        // Convert angles to radians
+        const startRad = (tacticStartAngle * Math.PI) / 180;
+        const endRad = (endAngle * Math.PI) / 180;
+        
+        pdf.setFillColor(tacticColors[t % tacticColors.length]);
+        
+        // Draw the segment as before
+        const segments = 60;
+        const angleStep = (endRad - startRad) / segments;
+        
+        pdf.moveTo(
+          tacticCenterX + tacticRadius * Math.cos(startRad),
+          tacticCenterY + tacticRadius * Math.sin(startRad)
+        );
+        
+        for (let j = 1; j <= segments; j++) {
+          const currentAngle = startRad + j * angleStep;
+          pdf.lineTo(
+            tacticCenterX + tacticRadius * Math.cos(currentAngle),
+            tacticCenterY + tacticRadius * Math.sin(currentAngle)
+          );
+        }
+        
+        // Line to center
+        pdf.lineTo(tacticCenterX, tacticCenterY);
+        pdf.fill();
+        
+        // Calculate position for label
+        const middleAngle = startRad + (endRad - startRad) / 2;
+        const percentage = Math.round((count / tacticTotal) * 100);
+        
+        tacticLabels.push([tactic, count, percentage, t]);
+        
+        tacticStartAngle = endAngle;
+        t++;
+      });
+      
+      // Add tactic labels
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      const legendStartX = 150;
+      const legendStartY = tacticCenterY - 25;
+      
+      tacticLabels.forEach(([tactic, count, percentage, idx], i) => {
+        const y = legendStartY + i * 10;
+        pdf.setFillColor(tacticColors[idx % tacticColors.length]);
+        pdf.rect(legendStartX, y - 4, 5, 5, 'F');
+        pdf.text(`${tactic} (${percentage}%)`, legendStartX + 10, y);
+      });
+      
+      // Footer
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.text(`CONFIDENTIAL - Reconnaissance Report - Page 3`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+      
       // ----- Hosts Summary Page -----
       pdf.addPage();
       pdf.setFillColor(20, 20, 30);
@@ -179,12 +464,57 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         theme: 'grid',
         headStyles: {
           fillColor: [50, 50, 75],
-          textColor: [255, 255, 255]
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
         },
         styles: {
-          fontSize: 9
+          fontSize: 9,
+          cellPadding: 3
         }
       });
+      
+      // Commands per host bar chart
+      const hostCounts = getHostCommandCounts();
+      
+      if (Object.keys(hostCounts).length > 0) {
+        pdf.setFont('helvetica', 'bold');
+        const tableHeight = hostTableData.length * 10 + 20; // Approximate table height
+        pdf.text("Commands Per Host", 20, tableHeight + 40);
+        
+        // Horizontal bar chart for commands per host
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        
+        const hostBarHeight = 8;
+        const hostGap = 4;
+        const hostStartY = tableHeight + 50;
+        const hostBarMaxWidth = 120;
+        
+        // Find the maximum value for scaling
+        const maxHostCommands = Math.max(...Object.values(hostCounts));
+        
+        Object.entries(hostCounts).forEach(([host, count], idx) => {
+          const y = hostStartY + idx * (hostBarHeight + hostGap);
+          
+          // Host label
+          pdf.text(host, 20, y + hostBarHeight / 2);
+          
+          // Bar
+          pdf.setFillColor(80, 100, 180);
+          const width = (count / maxHostCommands) * hostBarMaxWidth;
+          pdf.rect(70, y, width, hostBarHeight, 'F');
+          
+          // Count label
+          pdf.text(`${count}`, 75 + width, y + hostBarHeight / 2);
+        });
+      }
+      
+      // Footer
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.text(`CONFIDENTIAL - Reconnaissance Report - Page 4`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
       
       // ----- Tactics and Techniques Page -----
       pdf.addPage();
@@ -231,12 +561,21 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         theme: 'grid',
         headStyles: {
           fillColor: [50, 50, 75],
-          textColor: [255, 255, 255]
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
         },
         styles: {
-          fontSize: 9
+          fontSize: 9,
+          cellPadding: 3
         }
       });
+      
+      // Footer
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.text(`CONFIDENTIAL - Reconnaissance Report - Page 5`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
       
       // ----- Command Execution Timeline -----
       pdf.addPage();
@@ -278,23 +617,32 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         theme: 'grid',
         headStyles: {
           fillColor: [50, 50, 75],
-          textColor: [255, 255, 255]
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
         },
         styles: {
-          fontSize: 8
+          fontSize: 8,
+          cellPadding: 2
         },
         columnStyles: {
           3: { cellWidth: 60 }
         }
       });
-
+      
+      // Footer
+      pdf.setFillColor(20, 20, 30);
+      pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(10);
+      pdf.text(`CONFIDENTIAL - Reconnaissance Report - Page 6`, pageWidth / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+      
       // Save the PDF
       const filename = `recon-report-${data.name}-${new Date().toISOString().slice(0, 10)}.pdf`;
       pdf.save(filename);
 
       toast({
         title: "Professional Report Generated",
-        description: "Your detailed PDF report has been successfully downloaded.",
+        description: "Your detailed PDF report with visualizations has been successfully downloaded.",
       });
     } catch (error) {
       console.error('Error generating PDF:', error);

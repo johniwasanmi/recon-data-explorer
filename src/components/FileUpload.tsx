@@ -31,11 +31,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
         Object.keys(jsonData.steps).forEach(paw => {
           jsonData.steps[paw].steps.forEach((step: any) => {
             if (step.output && typeof step.output === 'string') {
-              step.output = {
-                stdout: step.output,
-                stderr: '',
-                exit_code: '0'
-              };
+              try {
+                step.output = JSON.parse(step.output);
+              } catch {
+                // If it's not valid JSON, create a structured object
+                step.output = {
+                  stdout: step.output,
+                  stderr: '',
+                  exit_code: '0'
+                };
+              }
             }
           });
         });
