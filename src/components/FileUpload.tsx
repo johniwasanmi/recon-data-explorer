@@ -26,6 +26,20 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
           throw new Error('Invalid recon data format');
         }
         
+        // Ensure proper structure for any string outputs
+        // Convert any string outputs to proper format
+        Object.keys(jsonData.steps).forEach(paw => {
+          jsonData.steps[paw].steps.forEach((step: any) => {
+            if (step.output && typeof step.output === 'string') {
+              step.output = {
+                stdout: step.output,
+                stderr: '',
+                exit_code: '0'
+              };
+            }
+          });
+        });
+        
         onDataLoad(jsonData);
         toast({
           title: "Data loaded successfully",
