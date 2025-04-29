@@ -20,14 +20,14 @@ const TacticsSummary: React.FC<TacticsSummaryProps> = ({ steps }) => {
       if (!tactics[tactic]) {
         tactics[tactic] = 0;
       }
-      tactics[tactic]++;
+      tactics[tactic] += 1;
       
       // Count techniques
       const techniqueKey = `${technique_id}-${tactic}`;
       if (!techniques[techniqueKey]) {
         techniques[techniqueKey] = { name: technique_name, count: 0 };
       }
-      techniques[techniqueKey]++;
+      techniques[techniqueKey].count += 1;
     });
   });
   
