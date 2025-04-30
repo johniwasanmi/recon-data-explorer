@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { ReconData } from '../types/reconTypes';
 import { formatDate, getDurationInMinutes } from '../utils/dateUtils';
-import { Shield, Server, User, Clock, AlertTriangle, CheckCircle2, ChartPie } from 'lucide-react';
+import { Shield, Server, User, Clock, AlertTriangle, CheckCircle2, ChartPie, Network } from 'lucide-react';
 import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, Cell, ResponsiveContainer } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import NetworkChart from './NetworkChart';
 
 interface DashboardProps {
   data: ReconData;
@@ -79,20 +78,89 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     };
   });
 
+  // Prepare network chart data
+  const networkNodes = [...data.host_group.map(host => ({
+    id: host.paw,
+    name: host.host || host.paw,
+    platform: host.platform,
+    value: Object.values(data.steps).find(step => step.steps.length > 0) ? 
+      data.steps[host.paw]?.steps.length || 0 : 0
+  }))];
+  
+  const networkLinks = [];
+  for (const hostPaw in data.steps) {
+    const hostNode = networkNodes.find(node => node.id === hostPaw);
+    if (hostNode) {
+      const steps = data.steps[hostPaw].steps;
+      for (const step of steps) {
+        const targetNode = {
+          id: `${hostPaw}-${step.link_id}`,
+          name: step.name,
+          technique_id: step.attack.technique_id,
+          status: step.status === 0 ? 'success' : 'failed',
+          paw: hostPaw
+        };
+        networkNodes.push(targetNode);
+        networkLinks.push({
+          source: hostPaw,
+          target: targetNode.id,
+          value: 1
+        });
+      }
+    }
+  }
+
+  // Format for visualization
+  const networkData = {
+    nodes: networkNodes,
+    links: networkLinks
+  };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background border border-border p-2 rounded shadow-lg">
+          <p className="font-medium">{payload[0].name}: {payload[0].value}</p>
+          <p className="text-sm text-muted-foreground">
+            {typeof payload[0].value === 'number' && totalCommands > 0 ? 
+              `${((payload[0].value / totalCommands) * 100).toFixed(1)}% of total` : ''}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="#fff" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+      >
+        {`${name}: ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   // Chart config for recharts
   const chartConfig = {
-    success: {
-      color: '#10b981',
+    successful: {
       theme: { light: '#10b981', dark: '#059669' },
       label: 'Successful'
     },
     failed: {
-      color: '#ef4444',
       theme: { light: '#ef4444', dark: '#dc2626' },
       label: 'Failed'
     },
     total: {
-      color: '#6366f1',
       theme: { light: '#6366f1', dark: '#4f46e5' },
       label: 'Total'
     },
@@ -145,7 +213,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Command Status Donut Chart */}
+      {/* First Row of Charts - Status and Platform */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="bg-card rounded-lg border shadow p-4">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
@@ -164,27 +232,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                   fill="#8884d8"
                   paddingAngle={2}
                   dataKey="value"
-                  label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={renderCustomizedLabel}
                 >
                   {commandStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-background border border-border p-2 rounded shadow-lg">
-                          <p className="font-medium">{payload[0].name}: {payload[0].value}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {((payload[0].value / totalCommands) * 100).toFixed(1)}% of total
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -206,27 +260,13 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({name, value}) => `${name}: ${value}`}
+                  label={({ name, value }) => `${name}: ${value}`}
                 >
                   {platformData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-background border border-border p-2 rounded shadow-lg">
-                          <p className="font-medium">{payload[0].name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {payload[0].value} host{payload[0].value > 1 ? 's' : ''}
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -234,82 +274,78 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Commands per Host Bar Chart */}
-      <div className="mt-6 bg-card rounded-lg border shadow p-4">
-        <h3 className="text-lg font-semibold mb-3 flex items-center">
-          <Server className="h-5 w-5 mr-2 text-primary" />
-          Commands Per Host
-        </h3>
-        <div className="h-80">
-          <ChartContainer 
-            className="h-full"
-            config={chartConfig}
-          >
-            <BarChart
-              data={commandsPerHost}
-              margin={{ top: 10, right: 30, left: 20, bottom: 70 }}
-            >
-              <XAxis 
-                dataKey="name" 
-                angle={-45} 
-                textAnchor="end" 
-                height={70} 
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent nameKey="name" />
-                }
-              />
-              <Legend />
-              <Bar dataKey="successful" name="Successful" fill="#10b981" stackId="a" />
-              <Bar dataKey="failed" name="Failed" fill="#ef4444" stackId="a" />
-            </BarChart>
-          </ChartContainer>
+      {/* Second Row of Charts - Commands per Host and Tactics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {/* Commands per Host Bar Chart */}
+        <div className="bg-card rounded-lg border shadow p-4">
+          <h3 className="text-lg font-semibold mb-3 flex items-center">
+            <Server className="h-5 w-5 mr-2 text-primary" />
+            Commands Per Host
+          </h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={commandsPerHost}
+                margin={{ top: 10, right: 30, left: 20, bottom: 70 }}
+              >
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  height={70} 
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="successful" name="Successful" fill="#10b981" stackId="a" />
+                <Bar dataKey="failed" name="Failed" fill="#ef4444" stackId="a" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Tactics Distribution */}
+        <div className="bg-card rounded-lg border shadow p-4">
+          <h3 className="text-lg font-semibold mb-3 flex items-center">
+            <ChartPie className="h-5 w-5 mr-2 text-primary" />
+            Tactics Distribution
+          </h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={tacticsData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={120}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={renderCustomizedLabel}
+                >
+                  {tacticsData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend layout="vertical" align="right" verticalAlign="middle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      {/* Tactics Distribution */}
+      {/* Network Chart */}
       <div className="mt-6 bg-card rounded-lg border shadow p-4">
         <h3 className="text-lg font-semibold mb-3 flex items-center">
-          <ChartPie className="h-5 w-5 mr-2 text-primary" />
-          Tactics Distribution
+          <Network className="h-5 w-5 mr-2 text-primary" />
+          Command Execution Network
         </h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={tacticsData}
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="value"
-                label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {tacticsData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip 
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="bg-background border border-border p-2 rounded shadow-lg">
-                        <p className="font-medium">{payload[0].name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {payload[0].value} command{payload[0].value > 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Legend layout="vertical" align="right" verticalAlign="middle" />
-            </PieChart>
-          </ResponsiveContainer>
+        <p className="text-sm text-muted-foreground mb-2">
+          Visualization of commands executed across hosts
+        </p>
+        <div className="h-96 w-full">
+          <NetworkChart data={networkData} />
         </div>
       </div>
 
