@@ -34,13 +34,20 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
               try {
                 step.output = JSON.parse(step.output);
               } catch {
-                // If it's not valid JSON, create a structured object
+                // If it's not valid JSON, create a structured object with the string as stdout
                 step.output = {
                   stdout: step.output,
                   stderr: '',
                   exit_code: '0'
                 };
               }
+            } else if (step.output === null || step.output === undefined) {
+              // Initialize empty output object if not present
+              step.output = {
+                stdout: '',
+                stderr: '',
+                exit_code: '0'
+              };
             }
           });
         });
