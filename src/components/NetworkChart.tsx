@@ -82,7 +82,7 @@ const NetworkChart: React.FC<NetworkChartProps> = ({ data }) => {
       .data(data.nodes)
       .enter()
       .append('g')
-      .call(d3.drag()
+      .call(d3.drag<any, any>()
         .on('start', dragStarted)
         .on('drag', dragged)
         .on('end', dragEnded));

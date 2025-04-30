@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ReconData } from '../types/reconTypes';
 import { formatDate, getDurationInMinutes } from '../utils/dateUtils';
@@ -79,7 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   });
 
   // Prepare network chart data
-  const networkNodes = [...data.host_group.map(host => ({
+  const networkNodes: any[] = [...data.host_group.map(host => ({
     id: host.paw,
     name: host.host || host.paw,
     platform: host.platform,
@@ -87,7 +88,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       data.steps[host.paw]?.steps.length || 0 : 0
   }))];
   
-  const networkLinks = [];
+  const networkLinks: any[] = [];
   for (const hostPaw in data.steps) {
     const hostNode = networkNodes.find(node => node.id === hostPaw);
     if (hostNode) {
@@ -98,7 +99,10 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           name: step.name,
           technique_id: step.attack.technique_id,
           status: step.status === 0 ? 'success' : 'failed',
-          paw: hostPaw
+          paw: hostPaw,
+          // Add these properties to satisfy TypeScript
+          platform: undefined,
+          value: 0
         };
         networkNodes.push(targetNode);
         networkLinks.push({
