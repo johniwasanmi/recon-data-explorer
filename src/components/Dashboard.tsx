@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ReconData } from '../types/reconTypes';
 import { formatDate, getDurationInMinutes } from '../utils/dateUtils';
@@ -24,13 +23,19 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const failedCommands = totalCommands - successfulCommands;
   const operationDuration = getDurationInMinutes(data.start, data.finish);
   
-  // Prepare data for charts
+  // Prepare data for charts with improved color schemes
   const commandStatusData = [
     { name: 'Successful', value: successfulCommands, color: '#10b981' },
     { name: 'Failed', value: failedCommands, color: '#ef4444' },
   ];
 
-  // Calculate tactics distribution
+  // Calculate tactics distribution with enhanced colors
+  const tacticsColors = [
+    '#8b5cf6', '#ec4899', '#f97316', '#0ea5e9', '#10b981', 
+    '#facc15', '#6366f1', '#14b8a6', '#f43f5e', '#84cc16',
+    '#8b5cf6', '#ec4899'
+  ];
+  
   const tacticsData = Object.values(data.steps).reduce((acc: {name: string, value: number, color: string}[], hostSteps) => {
     hostSteps.steps.forEach(step => {
       const tactic = step.attack.tactic;
@@ -39,18 +44,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       if (existingTactic) {
         existingTactic.value++;
       } else {
-        const colors = ['#8b5cf6', '#ec4899', '#f97316', '#0ea5e9', '#10b981', '#facc15', '#6366f1'];
         acc.push({
           name: tactic,
           value: 1,
-          color: colors[acc.length % colors.length],
+          color: tacticsColors[acc.length % tacticsColors.length],
         });
       }
     });
     return acc;
   }, []);
 
-  // Platform distribution data
+  // Platform distribution data with enhanced colors
+  const platformColors = {
+    'windows': '#60a5fa',
+    'linux': '#f472b6',
+    'darwin': '#fbbf24'
+  };
+  
   const platformData = data.host_group.reduce((acc: {name: string, value: number, color: string}[], host) => {
     const platform = host.platform;
     const existingPlatform = acc.find(p => p.name === platform);
@@ -58,11 +68,11 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     if (existingPlatform) {
       existingPlatform.value++;
     } else {
-      const colors = ['#60a5fa', '#f472b6', '#fbbf24'];
+      const color = platformColors[platform as keyof typeof platformColors] || '#6366f1';
       acc.push({
         name: platform,
         value: 1,
-        color: colors[acc.length % colors.length],
+        color: color,
       });
     }
     return acc;
@@ -80,52 +90,75 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   });
 
   // Prepare network chart data
-  const networkNodes: any[] = [...data.host_group.map(host => ({
-    id: host.paw,
-    name: host.host || host.paw,
-    platform: host.platform,
-    value: Object.values(data.steps).find(step => step.steps.length > 0) ? 
-      data.steps[host.paw]?.steps.length || 0 : 0
-  }))];
-  
-  const networkLinks: any[] = [];
-  for (const hostPaw in data.steps) {
-    const hostNode = networkNodes.find(node => node.id === hostPaw);
-    if (hostNode) {
-      const steps = data.steps[hostPaw].steps;
-      for (const step of steps) {
-        const targetNode = {
-          id: `${hostPaw}-${step.link_id}`,
+  const prepareNetworkData = () => {
+    // Create a map for quick node lookup
+    const nodeMap = new Map();
+    
+    // Create host nodes first
+    const nodes = data.host_group.map(host => {
+      const node = {
+        id: host.paw,
+        name: host.host || host.paw,
+        platform: host.platform,
+        value: data.steps[host.paw]?.steps.length || 0,
+        // Adding these properties for TypeScript
+        x: undefined,
+        y: undefined,
+        fx: null as number | null,
+        fy: null as number | null
+      };
+      
+      nodeMap.set(host.paw, node);
+      return node;
+    });
+    
+    const links: any[] = [];
+    
+    // Create command nodes and links
+    Object.entries(data.steps).forEach(([hostPaw, hostData]) => {
+      hostData.steps.forEach((step, index) => {
+        // Create unique ID for the command node
+        const commandId = `${hostPaw}-${step.link_id}`;
+        
+        // Create command node
+        const commandNode = {
+          id: commandId,
           name: step.name,
           technique_id: step.attack.technique_id,
           status: step.status === 0 ? 'success' : 'failed',
           paw: hostPaw,
-          // Add these properties to satisfy TypeScript
+          value: 0,
           platform: undefined,
-          value: 0
+          x: undefined,
+          y: undefined,
+          fx: null as number | null,
+          fy: null as number | null
         };
-        networkNodes.push(targetNode);
-        networkLinks.push({
+        
+        // Add command node
+        nodes.push(commandNode);
+        nodeMap.set(commandId, commandNode);
+        
+        // Add link from host to command
+        links.push({
           source: hostPaw,
-          target: targetNode.id,
+          target: commandId,
           value: 1
         });
-      }
-    }
-  }
-
-  // Format for visualization
-  const networkData = {
-    nodes: networkNodes,
-    links: networkLinks
+      });
+    });
+    
+    return { nodes, links };
   };
+
+  const networkData = prepareNetworkData();
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border border-border p-2 rounded shadow-lg">
-          <p className="font-medium">{payload[0].name}: {payload[0].value}</p>
-          <p className="text-sm text-muted-foreground">
+        <div className="bg-background/95 border border-border p-3 rounded shadow-lg backdrop-blur-sm">
+          <p className="font-medium text-sm">{payload[0].name}: {payload[0].value}</p>
+          <p className="text-xs text-muted-foreground">
             {typeof payload[0].value === 'number' && totalCommands > 0 ? 
               `${((payload[0].value / totalCommands) * 100).toFixed(1)}% of total` : ''}
           </p>
@@ -148,6 +181,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         fill="#fff" 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
+        fontSize="12"
       >
         {`${name}: ${(percent * 100).toFixed(0)}%`}
       </text>
@@ -184,7 +218,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="stat-card animate-fade-in">
+        <div className="stat-card animate-fade-in bg-gradient-to-br from-card to-card/90">
           <div className="flex items-center text-primary">
             <Server className="mr-2 h-5 w-5" />
             <span className="stat-label">Total Hosts</span>
@@ -192,7 +226,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           <span className="stat-value">{totalHosts}</span>
         </div>
         
-        <div className="stat-card animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <div className="stat-card animate-fade-in bg-gradient-to-br from-card to-card/90" style={{ animationDelay: '100ms' }}>
           <div className="flex items-center text-primary">
             <User className="mr-2 h-5 w-5" />
             <span className="stat-label">Total Commands</span>
@@ -200,7 +234,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           <span className="stat-value">{totalCommands}</span>
         </div>
         
-        <div className="stat-card animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="stat-card animate-fade-in bg-gradient-to-br from-card to-card/90" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center text-success">
             <CheckCircle2 className="mr-2 h-5 w-5" />
             <span className="stat-label">Successful Commands</span>
@@ -208,7 +242,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           <span className="stat-value">{successfulCommands}</span>
         </div>
         
-        <div className="stat-card animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <div className="stat-card animate-fade-in bg-gradient-to-br from-card to-card/90" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center text-danger">
             <AlertTriangle className="mr-2 h-5 w-5" />
             <span className="stat-label">Failed Commands</span>
@@ -219,7 +253,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
 
       {/* First Row of Charts - Status and Platform */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <div className="bg-card rounded-lg border shadow p-4">
+        <div className="bg-gradient-to-br from-card to-card/90 rounded-lg border shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
             <ChartPie className="h-5 w-5 mr-2 text-primary" />
             Command Execution Status
@@ -227,19 +261,34 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
+                <defs>
+                  {commandStatusData.map((entry, index) => (
+                    <linearGradient key={`gradient-${index}`} id={`pieGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={entry.color} />
+                      <stop offset="100%" stopColor={`${entry.color}99`} />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <Pie
                   data={commandStatusData}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={2}
+                  outerRadius={90}
+                  paddingAngle={4}
                   dataKey="value"
                   label={renderCustomizedLabel}
+                  animationBegin={200}
+                  animationDuration={1000}
+                  animationEasing="ease-out"
                 >
                   {commandStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={`url(#pieGradient${index})`} 
+                      stroke={entry.color} 
+                      strokeWidth={1}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -249,7 +298,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
         </div>
 
         {/* Platform Distribution Pie Chart */}
-        <div className="bg-card rounded-lg border shadow p-4">
+        <div className="bg-gradient-to-br from-card to-card/90 rounded-lg border shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
             <Server className="h-5 w-5 mr-2 text-primary" />
             Platform Distribution
@@ -257,17 +306,32 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
+                <defs>
+                  {platformData.map((entry, index) => (
+                    <linearGradient key={`platform-gradient-${index}`} id={`platformGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={entry.color} />
+                      <stop offset="100%" stopColor={`${entry.color}99`} />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <Pie
                   data={platformData}
                   cx="50%"
                   cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
+                  outerRadius={90}
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
+                  animationBegin={200}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
                 >
                   {platformData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={`url(#platformGradient${index})`}
+                      stroke={entry.color}
+                      strokeWidth={1}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -281,7 +345,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       {/* Second Row of Charts - Commands per Host and Tactics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {/* Commands per Host Bar Chart */}
-        <div className="bg-card rounded-lg border shadow p-4">
+        <div className="bg-gradient-to-br from-card to-card/90 rounded-lg border shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
             <Server className="h-5 w-5 mr-2 text-primary" />
             Commands Per Host
@@ -291,26 +355,73 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
               <BarChart
                 data={commandsPerHost}
                 margin={{ top: 10, right: 30, left: 20, bottom: 70 }}
+                barSize={20}
+                barGap={2}
+                barCategoryGap="20%"
               >
+                <defs>
+                  <linearGradient id="successGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient id="failedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ef4444" />
+                    <stop offset="100%" stopColor="#dc2626" />
+                  </linearGradient>
+                </defs>
                 <XAxis 
                   dataKey="name" 
                   angle={-45} 
                   textAnchor="end" 
                   height={70} 
                   tick={{ fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0' }}
                 />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="successful" name="Successful" fill="#10b981" stackId="a" />
-                <Bar dataKey="failed" name="Failed" fill="#ef4444" stackId="a" />
+                <YAxis 
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0' }}
+                />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                    borderRadius: '0.375rem',
+                    border: '1px solid #475569',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  wrapperStyle={{ paddingBottom: '10px' }} 
+                />
+                <Bar 
+                  dataKey="successful" 
+                  name="Successful" 
+                  fill="url(#successGradient)" 
+                  stackId="a" 
+                  radius={[4, 4, 0, 0]}
+                  animationBegin={300}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
+                />
+                <Bar 
+                  dataKey="failed" 
+                  name="Failed" 
+                  fill="url(#failedGradient)" 
+                  stackId="a" 
+                  radius={[0, 0, 4, 4]}
+                  animationBegin={300}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Tactics Distribution */}
-        <div className="bg-card rounded-lg border shadow p-4">
+        <div className="bg-gradient-to-br from-card to-card/90 rounded-lg border shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
             <ChartPie className="h-5 w-5 mr-2 text-primary" />
             Tactics Distribution
@@ -318,6 +429,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
+                <defs>
+                  {tacticsData.map((entry, index) => (
+                    <linearGradient key={`tactics-gradient-${index}`} id={`tacticsGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={entry.color} />
+                      <stop offset="100%" stopColor={`${entry.color}99`} />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <Pie
                   data={tacticsData}
                   cx="50%"
@@ -326,9 +445,18 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
                   fill="#8884d8"
                   dataKey="value"
                   label={renderCustomizedLabel}
+                  labelLine={false}
+                  animationBegin={200}
+                  animationDuration={1400}
+                  animationEasing="ease-out"
                 >
                   {tacticsData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={`url(#tacticsGradient${index})`} 
+                      stroke={entry.color}
+                      strokeWidth={1}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -340,20 +468,20 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
       </div>
 
       {/* Network Chart */}
-      <div className="mt-6 bg-card rounded-lg border shadow p-4">
+      <div className="mt-6 bg-gradient-to-br from-card to-card/90 rounded-lg border shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
         <h3 className="text-lg font-semibold mb-3 flex items-center">
           <Network className="h-5 w-5 mr-2 text-primary" />
           Command Execution Network
         </h3>
         <p className="text-sm text-muted-foreground mb-2">
-          Visualization of commands executed across hosts
+          Interactive visualization of commands executed across hosts. Drag nodes to explore connections, zoom with buttons or mouse wheel.
         </p>
-        <div className="h-96 w-full">
+        <div className="h-[500px] w-full">
           <NetworkChart data={networkData} />
         </div>
       </div>
 
-      <div className="mt-4 p-4 bg-card rounded-lg border shadow animate-fade-in" style={{ animationDelay: '400ms' }}>
+      <div className="mt-4 p-4 bg-gradient-to-br from-card to-card/90 rounded-lg border shadow-md animate-fade-in hover:shadow-lg transition-shadow duration-300" style={{ animationDelay: '400ms' }}>
         <div className="flex items-center mb-2">
           <Clock className="mr-2 h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold">Operation Details</h3>

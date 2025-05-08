@@ -230,6 +230,7 @@ export const sampleReconData: ReconData = {
             "technique_name": "Software Discovery",
             "technique_id": "T1518"
           },
+          "output": { "stdout": "", "stderr": "", "exit_code": "1" },
           "agent_reported_time": "2025-04-14T08:08:55Z"
         }
       ]
