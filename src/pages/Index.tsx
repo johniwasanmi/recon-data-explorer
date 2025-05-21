@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Dashboard from '../components/Dashboard';
 import HostCard from '../components/HostCard';
@@ -9,27 +10,62 @@ import Timeline from '../components/Timeline';
 import FileUpload from '../components/FileUpload';
 import ExportPDF from '../components/ExportPDF';
 import { sampleReconData } from '../data/sampleData';
-import { ReconData, Objectives } from '../types/reconTypes';
+import { ReconData } from '../types/reconTypes';
 import { Server } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { adaptToHostGroup } from '@/types/hostGroupTypes';
 
 const Index = () => {
-  // Initialize with sample data, ensuring all required properties match their types
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  
+  // Initialize with sample data, properly typed with the adaptToHostGroup helper
   const [data, setData] = useState<ReconData>({
     ...sampleReconData,
-    jitter: "0", // Changed from number to string to match ReconData interface
+    jitter: "0",
     objectives: {
       id: "sample-objective-1",
       name: "Sample Objective",
       description: "Default objective for demonstration",
       goals: [],
       percentage: 0
-    }, // Properly structured objectives object
+    },
+    host_group: sampleReconData.host_group.map(adaptToHostGroup),
     skipped_abilities: []
   });
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        setLoading(true);
+        const { data } = await supabase.auth.getSession();
+        
+        if (!data.session) {
+          // Redirect to login if not authenticated
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        navigate('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const handleDataUpload = (newData: ReconData) => {
     setData(newData);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
