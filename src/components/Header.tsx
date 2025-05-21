@@ -12,7 +12,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
 import { Settings, LogOut, ChevronDown, BarChart3 } from 'lucide-react';
-import logo from '/logo.png';
+
+// Use the external logo URL
+const logoUrl = "https://static.wixstatic.com/media/a7f3a2_ef354985b92d4092b0c56935a9563993~mv2.png";
 
 const Header = () => {
   const location = useLocation();
@@ -32,7 +34,7 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2 md:gap-8">
           <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="Caldera Logo" className="h-8" />
+            <img src={logoUrl} alt="Caldera Logo" className="h-8" />
             <span className="hidden font-bold sm:inline-block">
               Caldera Recon Explorer
             </span>

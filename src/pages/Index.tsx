@@ -14,7 +14,7 @@ import { Server } from 'lucide-react';
 
 const Index = () => {
   // Initialize with sample data, properly typed
-  const [data, setData] = useState<ReconData>(sampleReconData);
+  const [data, setData] = useState<ReconData>(sampleReconData as ReconData);
 
   const handleDataUpload = (newData: ReconData) => {
     setData(newData);
