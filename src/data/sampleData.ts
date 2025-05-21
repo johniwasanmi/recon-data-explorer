@@ -5,8 +5,14 @@ export const sampleReconData = {
   start: "2024-07-20T08:00:00Z",
   finish: "2024-07-20T17:30:00Z",
   planner: "Advanced Planner",
-  jitter: 0,
-  objectives: [],
+  jitter: "0", // Changed to string to match ReconData interface
+  objectives: {  // Added proper structure for objectives
+    id: "sample-objective-1",
+    name: "Sample Objective",
+    description: "Default objective for demonstration",
+    goals: [],
+    percentage: 0
+  },
   skipped_abilities: [],
   adversary: {
     name: "Cyber Threat Group Alpha",
