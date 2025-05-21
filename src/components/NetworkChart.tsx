@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ZoomIn, ZoomOut } from 'lucide-react';
@@ -265,7 +266,7 @@ const NetworkChart: React.FC<NetworkChartProps> = ({ data }) => {
       .attr('r', 35)
       .attr('stroke-opacity', 0)
       .on('end', function() {
-        // Restart animation
+        // Using function() instead of arrow to preserve this context
         d3.select(this)
           .attr('r', 20)
           .attr('stroke-opacity', 1)
@@ -299,8 +300,8 @@ const NetworkChart: React.FC<NetworkChartProps> = ({ data }) => {
 
     // Calculate and update text background width based on text length
     labels.each(function() {
-      const textWidth = this.getComputedTextLength();
-      d3.select(this.parentNode)
+      const textWidth = (this as SVGTextElement).getComputedTextLength();
+      d3.select(this.parentNode as Element)
         .select('rect')
         .transition()
         .duration(800)

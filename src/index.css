@@ -34,6 +34,11 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+    
+    /* Chart specific colors */
+    --chart-bg-1: 222 47% 11%;
+    --chart-bg-2: 262 83% 58%;
+    --chart-text: 210 40% 98%;
   }
 
   .dark {
@@ -64,6 +69,11 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
+    /* Chart specific colors */
+    --chart-bg-1: 224 71% 4%;
+    --chart-bg-2: 227 70% 40%;
+    --chart-text: 210 40% 98%;
   }
 }
 
@@ -145,4 +155,81 @@
   .technique-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
+  
+  /* Modern card designs */
+  .modern-card {
+    @apply bg-card/90 backdrop-blur-sm border rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+  }
+  
+  .glass-card {
+    @apply bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl shadow-lg;
+  }
+  
+  /* Enhanced chart styles */
+  .chart-container {
+    @apply p-4 rounded-xl bg-gradient-to-br from-card to-card/90 border border-border/50 shadow-md;
+  }
+  
+  /* Modern gradients for sections */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary/80 to-primary;
+  }
+  
+  .gradient-accent {
+    @apply bg-gradient-to-r from-accent/80 to-accent;
+  }
+  
+  .gradient-header {
+    @apply bg-gradient-to-r from-slate-800 to-slate-900;
+  }
 }
+
+/* Enhanced Animation Effects */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Apply animations with delays for staggered effects */
+.stagger-animation > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-animation > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-animation > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-animation > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-animation > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-animation > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-animation > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-animation > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-animation > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-animation > *:nth-child(10) { animation-delay: 450ms; }

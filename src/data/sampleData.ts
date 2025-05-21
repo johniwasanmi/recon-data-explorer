@@ -1,349 +1,182 @@
-
-import { ReconData } from "../types/reconTypes";
-
-export const sampleReconData: ReconData = {
-  "name": "build_ui",
-  "host_group": [
+export const sampleReconData = {
+  id: "sample-recon-123",
+  name: "Operation Crimson Dawn",
+  start: "2024-07-20T08:00:00Z",
+  finish: "2024-07-20T17:30:00Z",
+  planner: "Advanced Planner",
+  adversary: {
+    name: "Cyber Threat Group Alpha",
+    description: "A sophisticated cyber espionage group known for targeting critical infrastructure.",
+  },
+  objective: "Identify and exfiltrate sensitive data from target network.",
+  summary: "A simulated reconnaissance operation to assess network vulnerabilities and security posture.",
+  host_group: [
     {
-      "paw": "zvrvuz",
-      "sleep_min": 30,
-      "sleep_max": 60,
-      "watchdog": 0,
-      "group": "red",
-      "architecture": "amd64",
-      "platform": "linux",
-      "server": "http://192.168.1.145:8888",
-      "upstream_dest": "http://192.168.1.145:8888",
-      "username": "root",
-      "location": "/home/kali/splunkd",
-      "pid": 4913,
-      "ppid": 3886,
-      "trusted": true,
-      "executors": ["proc", "sh"],
-      "privilege": "Elevated",
-      "exe_name": "splunkd",
-      "host": "kali",
-      "contact": "HTTP",
-      "proxy_receivers": {},
-      "proxy_chain": [],
-      "origin_link_id": "",
-      "deadman_enabled": true,
-      "available_contacts": ["HTTP"],
-      "host_ip_addrs": ["192.168.1.102"],
-      "display_name": "kali$root",
-      "created": "2025-04-14T07:56:54Z",
-      "last_seen": "2025-04-14T10:20:31Z",
-      "links": [
-        {
-          "id": "0655432d-5b93-4487-8e4b-951e9a9e14c5",
-          "paw": "zvrvuz",
-          "command": "PiAkSE9NRS8uYmFzaF9oaXN0b3J5ICYmIHVuc2V0IEhJU1RGSUxF",
-          "plaintext_command": "> $HOME/.bash_history && unset HISTFILE",
-          "status": 0,
-          "score": 0,
-          "jitter": 0,
-          "decide": "2025-04-14T07:56:54Z",
-          "pin": 0,
-          "pid": "4934",
-          "facts": [],
-          "relationships": [],
-          "used": [],
-          "unique": "0655432d-5b93-4487-8e4b-951e9a9e14c5",
-          "collect": "2025-04-14T07:56:54Z",
-          "finish": "2025-04-14T07:56:54Z",
-          "ability": {
-            "ability_id": "43b3754c-def4-4699-a673-1d85648fda6a",
-            "tactic": "defense-evasion",
-            "technique_name": "Indicator Removal on Host: Clear Command History",
-            "technique_id": "T1070.003",
-            "name": "Avoid logs",
-            "description": "Stop terminal from logging history",
-            "executors": [
-              {
-                "name": "sh",
-                "platform": "darwin",
-                "command": "> $HOME/.bash_history && unset HISTFILE",
-                "timeout": 60
-              },
-              {
-                "name": "sh",
-                "platform": "linux",
-                "command": "> $HOME/.bash_history && unset HISTFILE",
-                "timeout": 60
-              },
-              {
-                "name": "psh",
-                "platform": "windows",
-                "command": "Clear-History;Clear",
-                "timeout": 60
-              }
-            ]
-          },
-          "executor": {
-            "name": "sh",
-            "platform": "linux",
-            "command": "> $HOME/.bash_history && unset HISTFILE",
-            "timeout": 60
-          },
-          "cleanup": 0,
-          "visibility": { "score": 50, "adjustments": [] },
-          "host": "kali",
-          "output": "False",
-          "deadman": false,
-          "agent_reported_time": "2025-04-14T07:56:53Z"
-        }
-      ],
-      "pending_contact": "HTTP"
+      paw: "abcdef123456",
+      host: "DESKTOP-ABC123",
+      platform: "Windows",
+      architecture: "x64",
+      username: "John.Doe",
+      domain: "WORKGROUP",
+      privilege: "User",
+      ip: "192.168.1.100",
+      host_ip_addrs: ["192.168.1.100", "192.168.56.1"],
+      os: "Microsoft Windows 10 Enterprise",
+      version: "10.0.19041",
+      created: "2024-07-20T08:00:00Z",
     },
     {
-      "paw": "qtqzda",
-      "sleep_min": 30,
-      "sleep_max": 60,
-      "watchdog": 0,
-      "group": "red",
-      "architecture": "amd64",
-      "platform": "windows",
-      "server": "http://10.10.14.150:8888",
-      "upstream_dest": "http://10.10.14.150:8888",
-      "username": "INLANEFREIGHT\\htb-student",
-      "location": "C:\\Users\\Public\\splunkd.exe",
-      "pid": 5716,
-      "ppid": 1160,
-      "trusted": false,
-      "executors": ["cmd", "psh", "proc"],
-      "privilege": "Elevated",
-      "exe_name": "splunkd.exe",
-      "host": "ACADEMY-EA-MS01",
-      "contact": "HTTP",
-      "proxy_receivers": {},
-      "proxy_chain": [],
-      "origin_link_id": "",
-      "deadman_enabled": true,
-      "available_contacts": ["HTTP"],
-      "host_ip_addrs": ["172.16.5.25", "10.129.13.128"],
-      "display_name": "ACADEMY-EA-MS01$INLANEFREIGHT\\htb-student",
-      "created": "2025-04-14T08:00:44Z",
-      "last_seen": "2025-04-14T09:55:11Z",
-      "links": [
-        {
-          "id": "78f31241-293e-4380-a74b-b2543b36adf6",
-          "paw": "qtqzda",
-          "command": "Q2xlYXItSGlzdG9yeTtDbGVhcg==",
-          "plaintext_command": "Clear-History;Clear",
-          "status": 0,
-          "score": 0,
-          "jitter": 0,
-          "decide": "2025-04-14T08:00:44Z",
-          "pin": 0,
-          "pid": "5280",
-          "facts": [],
-          "relationships": [],
-          "used": [],
-          "unique": "78f31241-293e-4380-a74b-b2543b36adf6",
-          "collect": "2025-04-14T08:00:44Z",
-          "finish": "2025-04-14T08:00:44Z",
-          "ability": {
-            "ability_id": "43b3754c-def4-4699-a673-1d85648fda6a",
-            "tactic": "defense-evasion",
-            "technique_name": "Indicator Removal on Host: Clear Command History",
-            "technique_id": "T1070.003",
-            "name": "Avoid logs",
-            "description": "Stop terminal from logging history",
-            "executors": [
-              {
-                "name": "sh",
-                "platform": "darwin",
-                "command": "> $HOME/.bash_history && unset HISTFILE",
-                "timeout": 60
-              },
-              {
-                "name": "sh",
-                "platform": "linux",
-                "command": "> $HOME/.bash_history && unset HISTFILE",
-                "timeout": 60
-              },
-              {
-                "name": "psh",
-                "platform": "windows",
-                "command": "Clear-History;Clear",
-                "timeout": 60
-              }
-            ]
-          },
-          "executor": {
-            "name": "psh",
-            "platform": "windows",
-            "command": "Clear-History;Clear",
-            "timeout": 60
-          },
-          "cleanup": 0,
-          "visibility": { "score": 50, "adjustments": [] },
-          "host": "ACADEMY-EA-MS01",
-          "output": "False",
-          "deadman": false,
-          "agent_reported_time": "2025-04-14T08:00:45Z"
-        }
-      ],
-      "pending_contact": "HTTP"
-    }
+      paw: "789xyz456abc",
+      host: "ubuntu-server",
+      platform: "Linux",
+      architecture: "x64",
+      username: "user",
+      domain: "local",
+      privilege: "User",
+      ip: "192.168.1.101",
+      host_ip_addrs: ["192.168.1.101"],
+      os: "Ubuntu 20.04 LTS",
+      version: "5.4.0-80-generic",
+      created: "2024-07-20T08:15:00Z",
+    },
+    {
+      paw: "def456ghi789",
+      host: "macbook-pro",
+      platform: "Darwin",
+      architecture: "x64",
+      username: "admin",
+      domain: "local",
+      privilege: "Admin",
+      ip: "192.168.1.102",
+      host_ip_addrs: ["192.168.1.102"],
+      os: "macOS Big Sur",
+      version: "11.5.2",
+      created: "2024-07-20T08:30:00Z",
+    },
   ],
-  "start": "2025-04-14T08:03:14Z",
-  "steps": {
-    "zvrvuz": {
-      "steps": [
+  steps: {
+    "abcdef123456": {
+      host_group: ["abcdef123456"],
+      steps: [
         {
-          "link_id": "d82c871b-b7dd-4ea9-9dcf-d3dc21b10ae2",
-          "ability_id": "bd527b63-9f9e-46e0-9816-b8434d2b8989",
-          "command": "whoami",
-          "plaintext_command": "whoami",
-          "delegated": "2025-04-14T08:03:14Z",
-          "run": "2025-04-14T08:03:58Z",
-          "status": 0,
-          "platform": "linux",
-          "executor": "sh",
-          "pid": 8683,
-          "description": "Obtain user from current session",
-          "name": "Current User",
-          "attack": {
-            "tactic": "discovery",
-            "technique_name": "System Owner/User Discovery",
-            "technique_id": "T1033"
+          name: "System Information",
+          description: "Gather basic system information using PowerShell.",
+          command: "Get-ComputerInfo",
+          run: "2024-07-20T08:05:00Z",
+          status: 0,
+          link_id: "link123",
+          attack: {
+            tactic: "Reconnaissance",
+            technique_id: "T1082",
+            technique_name: "System Information Discovery",
           },
-          "output": { "stdout": "root", "stderr": "", "exit_code": "0" },
-          "agent_reported_time": "2025-04-14T08:03:57Z"
+          output: {
+            stdout: "Domain: WORKGROUP\nOS: Microsoft Windows 10 Enterprise\nOS Version: 10.0.19041\nOS Build: 19041\nOS ServicePack: 0.0\nOS Type: x64\nProcess Architecture: AMD64\nComputer Name: DESKTOP-ABC123\nCurrent User: John.Doe\nElevated: false\nIs Admin: false\nNetwork adapters:\nEthernet: 192.168.1.100\nVirtualBox Host-Only Network: 192.168.56.1\nRunning as: DESKTOP-ABC123\\John.Doe",
+            stderr: "",
+            exit_code: "0"
+          },
         },
         {
-          "link_id": "01bbd66d-3c61-49ae-9627-43b259728cb0",
-          "ability_id": "830bb6ed-9594-4817-b1a1-c298c0f9f425",
-          "command": "which google-chrome",
-          "plaintext_command": "which google-chrome",
-          "delegated": "2025-04-14T08:08:20Z",
-          "run": "2025-04-14T08:08:55Z",
-          "status": 1,
-          "platform": "linux",
-          "executor": "sh",
-          "pid": 11216,
-          "description": "Check to see if Gooogle Chrome browser is installed",
-          "name": "Check Chrome",
-          "attack": {
-            "tactic": "discovery",
-            "technique_name": "Software Discovery",
-            "technique_id": "T1518"
+          name: "List Users",
+          description: "Enumerate local user accounts using PowerShell.",
+          command: "Get-LocalUser",
+          run: "2024-07-20T08:10:00Z",
+          status: 0,
+          link_id: "link456",
+          attack: {
+            tactic: "Reconnaissance",
+            technique_id: "T1087.001",
+            technique_name: "Account Discovery: Local Account",
           },
-          "output": { "stdout": "", "stderr": "", "exit_code": "1" },
-          "agent_reported_time": "2025-04-14T08:08:55Z"
-        }
-      ]
+          output: {
+            stdout: "Name     Enabled  AccountExpires               Description\n----     -------  --------------               -----------\nAdministrator False                               Built-in account for administering the computer/domain\nDefaultAccount False                               A user account managed by the system.\nGuest           False                               Built-in account for guest access to the computer/domain\nJohn.Doe        True                               User account",
+            stderr: "",
+            exit_code: "0"
+          },
+        },
+      ],
     },
-    "qtqzda": {
-      "steps": [
+    "789xyz456abc": {
+      host_group: ["789xyz456abc"],
+      steps: [
         {
-          "link_id": "1b41b26b-cbed-4c21-b3a4-2b6a1bf0b43b",
-          "ability_id": "bd527b63-9f9e-46e0-9816-b8434d2b8989",
-          "command": "whoami",
-          "plaintext_command": "whoami",
-          "delegated": "2025-04-14T08:03:14Z",
-          "run": "2025-04-14T08:03:27Z",
-          "status": 0,
-          "platform": "windows",
-          "executor": "psh",
-          "pid": 3272,
-          "description": "Obtain user from current session",
-          "name": "Current User",
-          "attack": {
-            "tactic": "discovery",
-            "technique_name": "System Owner/User Discovery",
-            "technique_id": "T1033"
+          name: "System Information",
+          description: "Gather basic system information using uname.",
+          command: "uname -a",
+          run: "2024-07-20T08:20:00Z",
+          status: 0,
+          link_id: "link789",
+          attack: {
+            tactic: "Reconnaissance",
+            technique_id: "T1082",
+            technique_name: "System Information Discovery",
           },
-          "output": {
-            "stdout": "inlanefreight\\htb-student",
-            "stderr": "",
-            "exit_code": "0"
+          output: {
+            stdout: "Linux ubuntu-server 5.4.0-80-generic #91-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux",
+            stderr: "",
+            exit_code: "0"
           },
-          "agent_reported_time": "2025-04-14T08:03:27Z"
         },
         {
-          "link_id": "bfa13477-0247-4267-832e-d2a6a1a778cf",
-          "ability_id": "b18e8767-b7ea-41a3-8e80-baf65a5ddef5",
-          "command": "python3 --version&python2 --version&python --version",
-          "plaintext_command": "python3 --version&python2 --version&python --version",
-          "delegated": "2025-04-14T08:07:24Z",
-          "run": "2025-04-14T08:07:28Z",
-          "status": 1,
-          "platform": "windows",
-          "executor": "cmd",
-          "pid": 3968,
-          "description": "Check to see what version of python is installed",
-          "name": "Check Python",
-          "attack": {
-            "tactic": "discovery",
-            "technique_name": "Software Discovery",
-            "technique_id": "T1518"
+          name: "List Users",
+          description: "Enumerate local user accounts using the id command.",
+          command: "id",
+          run: "2024-07-20T08:25:00Z",
+          status: 0,
+          link_id: "linkabc",
+          attack: {
+            tactic: "Reconnaissance",
+            technique_id: "T1087.001",
+            technique_name: "Account Discovery: Local Account",
           },
-          "output": {
-            "stdout": "",
-            "stderr": "'python3' is not recognized as an internal or external command,operable program or batch file.'python2' is not recognized as an internal or external command,operable program or batch file.'python' is not recognized as an internal or external command,operable program or batch file.",
-            "exit_code": "1"
+          output: {
+            stdout: "uid=1000(user) gid=1000(user) groups=1000(user),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),120(lpadmin),131(lxd),132(sambashare)\n",
+            stderr: "",
+            exit_code: "0"
           },
-          "agent_reported_time": "2025-04-14T08:07:29Z"
-        }
-      ]
-    }
-  },
-  "finish": "2025-04-14T08:12:05Z",
-  "planner": "atomic",
-  "adversary": {
-    "adversary_id": "01d77744-2515-401a-a497-d9f7241aac3c",
-    "name": "Check",
-    "description": "Profile to check proper platform configuration. Observe outputs to verify.",
-    "atomic_ordering": [
-      "bd527b63-9f9e-46e0-9816-b8434d2b8989",
-      "6e1a53c0-7352-4899-be35-fa7f364d5722",
-      "52177cc1-b9ab-4411-ac21-2eadc4b5d3b8",
-      "335cea7b-bec0-48c6-adfb-6066070f5f68",
-      "e8017c46-acb8-400c-a4b5-b3362b5b5baa",
-      "9849d956-37ea-49f2-a8b5-f2ca080b315d",
-      "830bb6ed-9594-4817-b1a1-c298c0f9f425",
-      "b18e8767-b7ea-41a3-8e80-baf65a5ddef5"
-    ],
-    "objective": "495a9828-cab1-44dd-a0ca-66e58177d8cc",
-    "tags": [],
-    "has_repeatable_abilities": false,
-    "plugin": "stockpile"
-  },
-  "jitter": "2/8",
-  "objectives": {
-    "id": "495a9828-cab1-44dd-a0ca-66e58177d8cc",
-    "name": "default",
-    "description": "This is a default objective that runs forever.",
-    "goals": [
-      {
-        "target": "exhaustion",
-        "value": "complete",
-        "count": 1048576,
-        "operator": "==",
-        "achieved": false
-      }
-    ],
-    "percentage": 0
-  },
-  "skipped_abilities": [
-    { "zvrvuz": [] },
-    {
-      "qtqzda": [
+        },
+      ],
+    },
+    "def456ghi789": {
+      host_group: ["def456ghi789"],
+      steps: [
         {
-          "reason": "Mismatched ability platform and executor",
-          "reason_id": 1,
-          "ability_id": "9849d956-37ea-49f2-a8b5-f2ca080b315d",
-          "ability_name": "Check Go"
+          name: "System Information",
+          description: "Gather basic system information using uname.",
+          command: "uname -a",
+          run: "2024-07-20T08:35:00Z",
+          status: 0,
+          link_id: "linkdef",
+          attack: {
+            tactic: "Reconnaissance",
+            technique_id: "T1082",
+            technique_name: "System Information Discovery",
+          },
+          output: {
+            stdout: "Darwin macbook-pro 20.6.0 Darwin Kernel Version 20.6.0: Mon Aug 30 06:12:21 PDT 2021; root:xnu-7195.141.6~3/RELEASE_X86_64 x86_64",
+            stderr: "",
+            exit_code: "0"
+          },
         },
         {
-          "reason": "Mismatched ability platform and executor",
-          "reason_id": 1,
-          "ability_id": "830bb6ed-9594-4817-b1a1-c298c0f9f425",
-          "ability_name": "Check Chrome"
-        }
-      ]
-    }
-  ]
+          name: "List Users",
+          description: "Enumerate local user accounts using dscl.",
+          command: 'dscl . list /Users | grep -v "_" | grep -v "daemon" | grep -v "nobody"',
+          run: "2024-07-20T08:40:00Z",
+          status: 0,
+          link_id: "linkghi",
+          attack: {
+            tactic: "Reconnaissance",
+            technique_id: "T1087.001",
+            technique_name: "Account Discovery: Local Account",
+          },
+          output: {
+            stdout: "admin\nguest\njohn.smith",
+            stderr: "",
+            exit_code: "0"
+          },
+        },
+      ],
+    },
+  },
 };

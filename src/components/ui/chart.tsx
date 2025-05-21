@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -50,7 +51,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none [&_.recharts-bar-rectangle]:transition-all [&_.recharts-bar-rectangle]:duration-300 [&_.recharts-pie]:drop-shadow-md hover:[&_.recharts-sector]:scale-105 hover:[&_.recharts-sector]:transition-transform",
           className
         )}
         {...props}
@@ -89,6 +90,44 @@ ${colorConfig
     return color ? `  --color-${key}: ${color};` : null
   })
   .join("\n")}
+}
+
+/* Enhanced styling for charts */
+${prefix} [data-chart=${id}] .recharts-cartesian-axis-line {
+  stroke: var(--color-axis, #ddd);
+  stroke-width: 1;
+}
+
+${prefix} [data-chart=${id}] .recharts-cartesian-axis-tick-line {
+  stroke: var(--color-axis-tick, #ddd);
+}
+
+${prefix} [data-chart=${id}] .recharts-label {
+  fill: var(--color-label, currentColor);
+}
+
+/* Gradient definitions for chart elements */
+${prefix} [data-chart=${id}] .recharts-bar-rectangle path {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+${prefix} [data-chart=${id}] .recharts-pie-sector path {
+  transition: transform 0.2s ease;
+}
+
+${prefix} [data-chart=${id}] .recharts-default-legend {
+  padding: 8px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+${prefix} [data-chart=${id}] .recharts-legend-item {
+  padding: 4px 8px;
+}
+
+${prefix} [data-chart=${id}] .recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 `
           )
@@ -177,9 +216,12 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl backdrop-blur-sm",
           className
         )}
+        style={{
+          animation: "fadeIn 0.2s ease-out forwards"
+        }}
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
@@ -278,7 +320,7 @@ const ChartLegendContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "flex items-center justify-center gap-4",
+          "flex items-center justify-center gap-4 text-sm backdrop-blur-sm px-3 py-1.5 rounded-full bg-background/90 shadow-sm border border-border/50",
           verticalAlign === "top" ? "pb-3" : "pt-3",
           className
         )}
@@ -291,14 +333,14 @@ const ChartLegendContent = React.forwardRef<
             <div
               key={item.value}
               className={cn(
-                "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
+                "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground hover:opacity-80 transition-opacity cursor-pointer"
               )}
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
               ) : (
                 <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
+                  className="h-3 w-3 shrink-0 rounded-[3px] shadow-sm"
                   style={{
                     backgroundColor: item.color,
                   }}
