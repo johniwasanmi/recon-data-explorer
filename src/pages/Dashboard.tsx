@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -33,7 +32,13 @@ const Dashboard = () => {
           throw error;
         }
 
-        setReports(data || []);
+        // Convert to proper UserReport[] type
+        const typedReports: UserReport[] = data?.map(item => ({
+          ...item,
+          report_data: item.report_data as unknown as ReconData
+        })) || [];
+
+        setReports(typedReports);
       } catch (error: any) {
         console.error('Error fetching reports:', error);
         toast({
@@ -60,7 +65,8 @@ const Dashboard = () => {
         user_id: user!.id,
         name: data.name || 'Unnamed Report',
         description: `Operation from ${new Date(data.start).toLocaleDateString()} to ${new Date(data.finish).toLocaleDateString()}`,
-        report_data: data
+        // Cast the ReconData to a valid JSON type for Supabase
+        report_data: data as unknown as any
       });
 
       if (error) throw error;
@@ -77,7 +83,13 @@ const Dashboard = () => {
         .eq('user_id', user!.id)
         .order('created_at', { ascending: false });
       
-      setReports(updatedReports || []);
+      // Convert to proper UserReport[] type
+      const typedReports: UserReport[] = updatedReports?.map(item => ({
+        ...item,
+        report_data: item.report_data as unknown as ReconData
+      })) || [];
+
+      setReports(typedReports);
       
     } catch (error: any) {
       console.error('Error saving report:', error);

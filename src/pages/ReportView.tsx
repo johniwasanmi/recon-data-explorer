@@ -39,7 +39,13 @@ const ReportView = () => {
           throw error;
         }
 
-        setReport(data);
+        // Convert to proper UserReport type
+        const typedReport: UserReport = {
+          ...data,
+          report_data: data.report_data as unknown as any
+        };
+
+        setReport(typedReport);
       } catch (error: any) {
         console.error('Error fetching report:', error);
         toast({

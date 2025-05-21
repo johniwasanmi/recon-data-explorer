@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowRight, BarChart3, Shield, Activity, PieChart } from 'lucide-react';
-import logo from '/logo.png';
+// Replace the direct import with a relative path to public assets
+// The logo will be served from the public directory
+const logoPath = '/caldera-logo.png';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -19,7 +21,7 @@ const Landing = () => {
             <div className="flex flex-col md:flex-row items-center">
               <div className="md:w-1/2 mb-10 md:mb-0">
                 <div className="flex items-center mb-6">
-                  <img src={logo} alt="Caldera Logo" className="h-12 mr-3" />
+                  <img src={logoPath} alt="Caldera Logo" className="h-12 mr-3" />
                   <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
                     Caldera Recon Explorer
                   </h1>
@@ -126,7 +128,7 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <img src={logo} alt="Caldera Logo" className="h-8 mr-2" />
+              <img src={logoPath} alt="Caldera Logo" className="h-8 mr-2" />
               <span className="font-bold">Caldera Recon Explorer</span>
             </div>
             <div className="text-sm text-muted-foreground">
