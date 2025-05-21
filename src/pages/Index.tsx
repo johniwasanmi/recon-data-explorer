@@ -6,16 +6,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { ReconData } from '@/types/reconTypes';
 import { adaptToHostGroup, SimplifiedHostGroup } from '@/types/hostGroupTypes';
 
-// Import the sample data directly
-import sampleData from '@/data/sampleData';
+// Import the sample data correctly
+import { sampleReconData } from '@/data/sampleData';
 
 const Index = () => {
   const [data, setData] = useState<ReconData>(() => {
     // Convert the sample data to the correct format
     const formattedSampleData = {
-      ...sampleData,
+      ...sampleReconData,
       // Convert the simplified host groups to full host groups
-      host_group: (sampleData.host_group as SimplifiedHostGroup[]).map(
+      host_group: (sampleReconData.host_group as SimplifiedHostGroup[]).map(
         hostGroup => adaptToHostGroup(hostGroup)
       )
     };

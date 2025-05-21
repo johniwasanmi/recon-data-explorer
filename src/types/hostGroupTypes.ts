@@ -24,13 +24,23 @@ export function adaptToHostGroup(simplified: SimplifiedHostGroup): HostGroup {
     watchdog: 0,
     group: 'default',
     contact: 'tcp',
-    location: '',  // Changed from object to string to match the type
+    location: '',  // String to match the type
     pid: 0,
     ppid: 0,
     trusted: false,
     executors: [],
     exe_name: '',
     last_seen: '',
-    links: []
+    links: [],
+    // Adding the missing properties
+    server: '',
+    upstream_dest: '',
+    proxy_receivers: {},
+    proxy_chain: [],
+    origin_link_id: '',
+    deadman_enabled: false,
+    available_contacts: [],
+    display_name: simplified.host || '',
+    pending_contact: ''
   };
 }
