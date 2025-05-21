@@ -1,8 +1,8 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { ReconData } from '../types/reconTypes';
 
 interface FileUploadProps {
@@ -11,14 +11,11 @@ interface FileUploadProps {
 
 const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsLoading(true);
-    
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -58,7 +55,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
         });
         
         onDataLoad(jsonData);
-        
         toast({
           title: "Data loaded successfully",
           description: `Loaded data for operation: ${jsonData.name || 'Unnamed'}`,
@@ -70,20 +66,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
           description: "The file is not a valid recon data JSON",
           variant: "destructive",
         });
-      } finally {
-        setIsLoading(false);
       }
     };
-    
-    reader.onerror = () => {
-      toast({
-        title: "Error reading file",
-        description: "There was a problem reading the file",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    };
-    
     reader.readAsText(file);
     
     // Reset the file input
@@ -97,7 +81,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
   };
 
   return (
-    <div className="text-center">
+    <div className="mb-6">
       <input 
         type="file" 
         ref={fileInputRef}
@@ -109,16 +93,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onDataLoad }) => {
       <Button 
         variant="outline" 
         onClick={triggerFileInput}
-        className="flex items-center gap-2 px-6 py-5 h-auto"
-        disabled={isLoading}
-        size="lg"
+        className="flex items-center gap-2"
       >
-        {isLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <Upload className="h-5 w-5" />
-        )}
-        {isLoading ? "Processing..." : "Upload Recon Data"}
+        <Upload className="h-4 w-4" />
+        Upload Recon Data
       </Button>
       <p className="text-xs text-muted-foreground mt-2">
         Upload a JSON file containing reconnaissance data

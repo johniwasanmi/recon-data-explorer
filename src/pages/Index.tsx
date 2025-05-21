@@ -9,12 +9,23 @@ import Timeline from '../components/Timeline';
 import FileUpload from '../components/FileUpload';
 import ExportPDF from '../components/ExportPDF';
 import { sampleReconData } from '../data/sampleData';
-import { ReconData } from '../types/reconTypes';
+import { ReconData, Objectives } from '../types/reconTypes';
 import { Server } from 'lucide-react';
 
 const Index = () => {
-  // Initialize with sample data, properly typed
-  const [data, setData] = useState<ReconData>(sampleReconData as ReconData);
+  // Initialize with sample data, ensuring all required properties match their types
+  const [data, setData] = useState<ReconData>({
+    ...sampleReconData,
+    jitter: "0", // Changed from number to string to match ReconData interface
+    objectives: {
+      id: "sample-objective-1",
+      name: "Sample Objective",
+      description: "Default objective for demonstration",
+      goals: [],
+      percentage: 0
+    }, // Properly structured objectives object
+    skipped_abilities: []
+  });
 
   const handleDataUpload = (newData: ReconData) => {
     setData(newData);
