@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('Guest');
+  const [email, setEmail] = useState('guest@example.com');
   const [password, setPassword] = useState('fc624f0f-4750-4c97-933e-d7a9aedc2e81');
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -52,6 +52,7 @@ const Login = () => {
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
         description: error.message || "Please check your credentials and try again.",
@@ -89,7 +90,7 @@ const Login = () => {
           <Input 
             id="email"
             type="text" 
-            placeholder="Guest" 
+            placeholder="guest@example.com" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

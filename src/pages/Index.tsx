@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Dashboard from '@/components/Dashboard';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,18 +11,38 @@ import { adaptToHostGroup, SimplifiedHostGroup } from '@/types/hostGroupTypes';
 import { sampleReconData } from '@/data/sampleData';
 
 const Index = () => {
-  const [data, setData] = useState<ReconData>(() => {
-    // Convert the sample data to the correct format
-    const formattedSampleData = {
-      ...sampleReconData,
-      // Convert the simplified host groups to full host groups
-      host_group: (sampleReconData.host_group as SimplifiedHostGroup[]).map(
-        hostGroup => adaptToHostGroup(hostGroup)
-      )
+  const navigate = useNavigate();
+  const [data, setData] = useState<ReconData>({
+    ...sampleReconData,
+    // Convert the simplified host groups to full host groups
+    host_group: (sampleReconData.host_group as SimplifiedHostGroup[]).map(
+      hostGroup => adaptToHostGroup(hostGroup)
+    )
+  });
+  
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+      }
     };
     
-    return formattedSampleData;
-  });
+    checkAuth();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session && event === 'SIGNED_OUT') {
+        navigate('/login');
+      }
+    });
+    
+    // Clean up subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
