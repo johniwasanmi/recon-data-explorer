@@ -39,7 +39,8 @@ const Signup = () => {
     try {
       // Get the current URL to determine if we're in development or production
       const url = window.location.origin;
-      const redirectUrl = new URL('/auth/callback', url).toString();
+      const redirectUrl = `${url}/auth/callback`;
+      console.log('Redirect URL:', redirectUrl);
 
       const { error } = await supabase.auth.signUp({
         email,
@@ -70,6 +71,7 @@ const Signup = () => {
         description: error.message || "There was a problem creating your account.",
         variant: "destructive",
       });
+      console.error("Signup error:", error);
     } finally {
       setLoading(false);
     }

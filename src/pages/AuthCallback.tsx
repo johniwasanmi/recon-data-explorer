@@ -15,39 +15,85 @@ const AuthCallback = () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        console.log('Auth callback triggered, URL:', window.location.href);
 
-        // Get the access token from the URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
+        // Check if there's a hash fragment in the URL (typically used in OAuth flows)
+        if (window.location.hash) {
+          console.log('Hash detected in URL');
+          // Get the access token from the URL
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
 
-        // If tokens exist in the URL, set the session
-        if (accessToken && refreshToken) {
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+          // If tokens exist in the URL, set the session
+          if (accessToken && refreshToken) {
+            console.log('Tokens found in URL hash, setting session');
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
 
-          if (error) {
-            throw error;
+            if (error) {
+              throw error;
+            }
+
+            toast({
+              title: "Authentication successful",
+              description: "Your account has been verified.",
+            });
+
+            // Redirect to the dashboard
+            navigate('/');
+            return;
           }
+        }
 
-          toast({
-            title: "Authentication successful",
-            description: "Your account has been verified.",
-          });
+        // Handle email verification links - the flow has changed in newer Supabase versions
+        // Let's look for query parameters that might be present
+        const queryParams = new URLSearchParams(window.location.search);
+        const type = queryParams.get('type');
+        
+        console.log('Query params:', Object.fromEntries(queryParams.entries()));
 
-          // Redirect to the dashboard
-          navigate('/');
-        } else {
-          // Handle email verification links
+        if (type === 'recovery' || type === 'signup' || type === 'invite' || type === 'magiclink') {
+          console.log('Processing auth type:', type);
+          // Let Supabase handle the auth flow
           const { error } = await supabase.auth.getSession();
+          
           if (error) {
             throw error;
           }
 
           // The session is now set, redirect to the dashboard
+          toast({
+            title: type === 'signup' ? "Account verified" : "Authentication successful",
+            description: type === 'signup' 
+              ? "Your account has been successfully verified." 
+              : "You have been successfully authenticated.",
+          });
+
           navigate('/');
+          return;
+        }
+
+        // Fallback for other scenarios: just check if we have a session
+        console.log('No specific auth parameters found, checking session');
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw error;
+        }
+
+        if (data?.session) {
+          console.log('Session found');
+          navigate('/');
+        } else {
+          console.log('No session found');
+          setError("No authentication data found. Please try again.");
+          setTimeout(() => {
+            navigate('/login');
+          }, 3000);
         }
       } catch (err: any) {
         console.error('Auth callback error:', err);
