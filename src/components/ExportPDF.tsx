@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -7,7 +6,7 @@ import { FileDown, Loader2 } from 'lucide-react';
 import { pdf, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { Font } from '@react-pdf/renderer';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import logo from '/logo.png';
+import logoPath from '/caldera-logo.png';
 
 // Register custom fonts
 Font.register({
@@ -241,7 +240,7 @@ const ReconDataDocument = ({ data }: { data: ReconData }) => {
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Image src={logo} style={styles.logo} />
+          <Image src={logoPath} style={styles.logo} />
           <View>
             <Text style={styles.title}>Caldera Recon Report</Text>
             <Text style={styles.text}>{data.name}</Text>
