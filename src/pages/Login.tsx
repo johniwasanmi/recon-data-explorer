@@ -12,8 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('Guest');
+  const [password, setPassword] = useState('fc624f0f-4750-4c97-933e-d7a9aedc2e81');
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
@@ -23,7 +23,7 @@ const Login = () => {
       const { data } = await supabase.auth.getSession();
       if (data?.session) {
         setRedirecting(true);
-        navigate('/');
+        navigate('/dashboard');
       }
     };
     
@@ -50,7 +50,7 @@ const Login = () => {
       });
 
       // Redirect to dashboard
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -77,7 +77,7 @@ const Login = () => {
 
   return (
     <AuthLayout 
-      title="Welcome back" 
+      title="Welcome to Recon Data Explorer" 
       subtitle="Sign in to your account to continue"
     >
       <form onSubmit={handleLogin} className="space-y-4">
@@ -88,8 +88,8 @@ const Login = () => {
           </Label>
           <Input 
             id="email"
-            type="email" 
-            placeholder="name@example.com" 
+            type="text" 
+            placeholder="Guest" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

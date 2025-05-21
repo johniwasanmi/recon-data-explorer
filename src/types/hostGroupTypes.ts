@@ -24,10 +24,7 @@ export function adaptToHostGroup(simplified: SimplifiedHostGroup): HostGroup {
     watchdog: 0,
     group: 'default',
     contact: 'tcp',
-    location: {
-      lat: 0,
-      lon: 0
-    },
+    location: '',  // Changed from object to string to match the type
     pid: 0,
     ppid: 0,
     trusted: false,

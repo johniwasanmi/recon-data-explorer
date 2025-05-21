@@ -5,7 +5,9 @@ import Dashboard from '@/components/Dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { ReconData } from '@/types/reconTypes';
 import { adaptToHostGroup, SimplifiedHostGroup } from '@/types/hostGroupTypes';
-import { sampleData } from '@/data/sampleData';
+
+// Import the sample data directly
+import sampleData from '@/data/sampleData';
 
 const Index = () => {
   const [data, setData] = useState<ReconData>(() => {
