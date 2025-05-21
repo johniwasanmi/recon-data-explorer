@@ -1,4 +1,3 @@
-
 export interface Executor {
   name: string;
   platform: string;
@@ -74,6 +73,10 @@ export interface HostGroup {
   last_seen: string;
   links: Link[];
   pending_contact: string;
+  domain?: string;
+  ip?: string;
+  os?: string;
+  version?: string;
 }
 
 export interface Step {
@@ -159,4 +162,23 @@ export interface ReconData {
   jitter: string;
   objectives: Objectives;
   skipped_abilities: any[];
+}
+
+export interface UserProfile {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  avatar_url: string | null;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+export interface UserReport {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  report_data: ReconData;
 }
