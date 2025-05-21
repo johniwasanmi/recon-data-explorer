@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 
@@ -21,11 +20,8 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
       </div>
       
       <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <motion.div 
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+        <div 
+          className="w-full max-w-md animate-fade-in"
         >
           <div className="bg-card rounded-xl shadow-xl border border-border/40 backdrop-blur-sm p-8">
             <div className="mb-8 text-center">
@@ -34,7 +30,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
             </div>
             {children}
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <footer className="py-6 text-center text-sm text-muted-foreground">

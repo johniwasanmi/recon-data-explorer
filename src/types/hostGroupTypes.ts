@@ -27,7 +27,7 @@ export function adaptToHostGroup(simplified: SimplifiedHostGroup): HostGroup {
     location: {
       lat: 0,
       lon: 0
-    },
+    } as any, // Cast to any to resolve the type error
     pid: 0,
     ppid: 0,
     trusted: false,

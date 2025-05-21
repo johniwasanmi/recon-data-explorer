@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Shield, Check, ArrowRight, LineChart, Lock, Server } from 'lucide-react';
 
@@ -30,11 +29,8 @@ const Landing = () => {
         <section className="py-20 lg:py-32">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="space-y-6"
+              <div
+                className="space-y-6 animate-fade-in"
               >
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
                   <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
@@ -62,25 +58,19 @@ const Landing = () => {
                 <div className="pt-4">
                   <div className="flex items-center gap-8">
                     {['Real-time analytics', 'Secure platform', 'Interactive reports'].map((item, index) => (
-                      <motion.div 
+                      <div 
                         key={index}
                         className="flex items-center text-sm text-muted-foreground"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
                       >
                         <Check className="h-4 w-4 text-primary mr-1" />
                         {item}
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative"
+              </div>
+              <div
+                className="relative animate-fade-in"
               >
                 <div className="bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl p-1">
                   <div className="bg-card rounded-xl shadow-xl overflow-hidden border border-border">
@@ -92,7 +82,7 @@ const Landing = () => {
                   </div>
                 </div>
                 <div className="absolute -z-10 top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 bg-primary/20 blur-3xl rounded-full opacity-20"></div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </section>
@@ -108,20 +98,16 @@ const Landing = () => {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <motion.div
+                <div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow animate-fade-in"
                 >
                   <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                     <feature.icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -131,29 +117,18 @@ const Landing = () => {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="bg-gradient-to-r from-primary/80 to-accent/80 rounded-2xl p-10 lg:p-20 text-white text-center">
-              <motion.h2 
-                className="text-3xl lg:text-4xl font-bold mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
+              <h2 
+                className="text-3xl lg:text-4xl font-bold mb-6 animate-fade-in"
               >
                 Ready to explore your reconnaissance data?
-              </motion.h2>
-              <motion.p 
-                className="text-lg mb-10 max-w-2xl mx-auto opacity-90"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+              </h2>
+              <p 
+                className="text-lg mb-10 max-w-2xl mx-auto opacity-90 animate-fade-in"
               >
                 Sign up today and start visualizing your security reconnaissance data more effectively.
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+              </p>
+              <div
+                className="animate-fade-in"
               >
                 <Link to="/signup">
                   <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
@@ -161,7 +136,7 @@ const Landing = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-              </motion.div>
+              </div>
             </div>
           </div>
         </section>
