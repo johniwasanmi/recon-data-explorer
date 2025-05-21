@@ -13,8 +13,13 @@ import { ReconData } from '../types/reconTypes';
 import { Server } from 'lucide-react';
 
 const Index = () => {
-  // Start with sample data, but allow it to be replaced by uploaded data
-  const [data, setData] = useState<ReconData>(sampleReconData);
+  // Initialize with sample data, but with additional required properties
+  const [data, setData] = useState<ReconData>({
+    ...sampleReconData,
+    jitter: 0,
+    objectives: [],
+    skipped_abilities: []
+  });
 
   const handleDataUpload = (newData: ReconData) => {
     setData(newData);

@@ -1,9 +1,13 @@
+
 export const sampleReconData = {
   id: "sample-recon-123",
   name: "Operation Crimson Dawn",
   start: "2024-07-20T08:00:00Z",
   finish: "2024-07-20T17:30:00Z",
   planner: "Advanced Planner",
+  jitter: 0,
+  objectives: [],
+  skipped_abilities: [],
   adversary: {
     name: "Cyber Threat Group Alpha",
     description: "A sophisticated cyber espionage group known for targeting critical infrastructure.",

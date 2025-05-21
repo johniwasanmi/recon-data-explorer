@@ -131,22 +131,9 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         tableHeader: '#f1f5f9',
         tableHeaderText: '#0f172a'
       };
-
-      // Define custom gradients
-      const addGradient = (name: string, x1: number, y1: number, x2: number, y2: number, colors: string[]) => {
-        const gradient = pdf.addGradient({
-          type: 'axial',
-          coords: { x1, y1, x2, y2 },
-          stops: colors.map((color, index) => [index / (colors.length - 1), color])
-        });
-        return pdf.setFillGradient(gradient);
-      };
-
-      // ----- Cover Page -----
-      // Header bar with gradient
-      addGradient('headerGradient', 0, 0, pdf.internal.pageSize.getWidth(), 0, 
-        [colors.primaryDark, colors.primary]);
       
+      // ----- Cover Page -----
+      // Header bar with solid color instead of gradient
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 60, 'F');
       
@@ -169,7 +156,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       
       // Add a subtle background to the content area
       pdf.setFillColor('#f8fafc');
-      pdf.roundedRect(15, contentStartY - 10, pageWidth - 30, 100, 3, 3, 'F');
+      pdf.rect(15, contentStartY - 10, pageWidth - 30, 100, 'F');
       
       pdf.setTextColor(colors.dark);
       pdf.text(`Generated: ${formatDate(new Date().toISOString())}`, 20, contentStartY);
@@ -228,7 +215,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       pdf.setFont('helvetica', 'bold');
       pdf.text('Command Execution Summary', 20, barY - 10);
       
-      // Success/Failure bar with gradient
+      // Success/Failure bar with solid colors instead of gradient
       const barWidth = 170;
       const barHeight = 20;
       const successWidth = (successful / totalCommands) * barWidth;
@@ -236,21 +223,15 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // Draw outline
       pdf.setDrawColor(colors.tableBorder);
       pdf.setLineWidth(0.5);
-      pdf.roundedRect(20, barY, barWidth, barHeight, 2, 2, 'S');
+      pdf.rect(20, barY, barWidth, barHeight, 'S');
       
-      // Draw success portion with gradient
-      addGradient('successGradient', 20, barY, 20 + successWidth, barY, 
-        ['#86efac', '#22c55e']);
-      pdf.roundedRect(20, barY, successWidth, barHeight, { 
-        tl: 2, tr: 0, br: 0, bl: 2 
-      }, 'F');
+      // Draw success portion with solid color
+      pdf.setFillColor('#22c55e');
+      pdf.rect(20, barY, successWidth, barHeight, 'F');
       
-      // Draw failure portion with gradient
-      addGradient('failureGradient', 20 + successWidth, barY, 20 + barWidth, barY, 
-        ['#fca5a5', '#ef4444']);
-      pdf.roundedRect(20 + successWidth, barY, barWidth - successWidth, barHeight, {
-        tl: 0, tr: 2, br: 2, bl: 0
-      }, 'F');
+      // Draw failure portion with solid color
+      pdf.setFillColor('#ef4444');
+      pdf.rect(20 + successWidth, barY, barWidth - successWidth, barHeight, 'F');
       
       // Add labels to the bars
       pdf.setFont('helvetica', 'bold');
@@ -258,7 +239,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       pdf.text(`Success: ${successful} (${successRate}%)`, 25, barY + 13);
       pdf.text(`Failed: ${failed}`, 20 + successWidth + 5, barY + 13);
       
-      // Footer with gradient
+      // Footer with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
       pdf.setTextColor(255, 255, 255);
@@ -269,7 +250,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // ----- Executive Summary Page -----
       pdf.addPage();
       
-      // Header with gradient
+      // Header with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 20, 'F');
       pdf.setTextColor(colors.headerText);
@@ -279,7 +260,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       
       // Add a subtle card background
       pdf.setFillColor('#f8fafc');
-      pdf.roundedRect(15, 25, pageWidth - 30, 50, 3, 3, 'F');
+      pdf.rect(15, 25, pageWidth - 30, 50, 'F');
       
       pdf.setTextColor(colors.dark);
       pdf.setFontSize(14);
@@ -302,14 +283,14 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       pdf.setFillColor('#ffffff');
       pdf.setDrawColor(colors.tableBorder);
       pdf.setLineWidth(0.5);
-      pdf.roundedRect(15, cmdVisualsY + 5, pageWidth - 30, 70, 3, 3, 'FD');
+      pdf.rect(15, cmdVisualsY + 5, pageWidth - 30, 70, 'FD');
       
       // Command success/failure stats with modern styling
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text("Success vs. Failure", 20, cmdVisualsY + 20);
       
-      // Create bar charts for success/failure with gradients
+      // Create bar charts for success/failure with solid colors
       const metricY = cmdVisualsY + 30;
       
       // Draw success metric
@@ -320,12 +301,11 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       const maxBarWidth = 100;
       const barH = 8;
       
-      addGradient('successBarGradient', 80, metricY - 6, 80 + maxBarWidth, metricY - 6, 
-        ['#86efac', '#22c55e']);
-      pdf.roundedRect(80, metricY - 6, maxBarWidth, barH, 2, 2, 'F');
+      pdf.setFillColor('#f9f9f9');
+      pdf.rect(80, metricY - 6, maxBarWidth, barH, 'F');
       
       pdf.setFillColor(colors.success);
-      pdf.roundedRect(80, metricY - 6, (successful / totalCommands) * maxBarWidth, barH, 2, 2, 'F');
+      pdf.rect(80, metricY - 6, (successful / totalCommands) * maxBarWidth, barH, 'F');
       
       pdf.setFont('helvetica', 'bold');
       pdf.text(`${successful}`, 185, metricY);
@@ -334,71 +314,59 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       pdf.setFont('helvetica', 'normal');
       pdf.text("Failed", 25, metricY + 15);
       
-      addGradient('failedBarGradient', 80, metricY + 9, 80 + maxBarWidth, metricY + 9, 
-        ['#fecaca', '#ef4444']);
       pdf.setFillColor('#f9f9f9');
-      pdf.roundedRect(80, metricY + 9, maxBarWidth, barH, 2, 2, 'F');
+      pdf.rect(80, metricY + 9, maxBarWidth, barH, 'F');
       
       pdf.setFillColor(colors.danger);
-      pdf.roundedRect(80, metricY + 9, (failed / totalCommands) * maxBarWidth, barH, 2, 2, 'F');
+      pdf.rect(80, metricY + 9, (failed / totalCommands) * maxBarWidth, barH, 'F');
       
       pdf.setFont('helvetica', 'bold');
       pdf.text(`${failed}`, 185, metricY + 15);
       
-      // Add pie chart for platforms
+      // Add pie chart for platforms - simplified without sector method
       const platforms = getPlatformCounts();
       pdf.setFont('helvetica', 'bold');
       pdf.text("Platforms Distribution", 20, metricY + 40);
       
-      // Draw modern pie chart for platforms
-      const centerX = 50;
-      const centerY = metricY + 60;
-      const radius = 25;
-      
+      // Instead of pie chart, draw a bar chart for platforms
       const platformColors = {
-        'windows': colors.primary,
-        'linux': colors.secondary,
-        'darwin': colors.warning,
+        'Windows': colors.primary,
+        'Linux': colors.secondary,
+        'Darwin': colors.warning,
         'other': colors.info
       };
       
-      let startAngle = 0;
-      const platformLabels: [string, number][] = [];
-      const total = Object.values(platforms).reduce((sum, count) => sum + count, 0);
-      
-      Object.entries(platforms).forEach(([platform, count], index) => {
-        const angle = (count / total) * 2 * Math.PI;
-        const endAngle = startAngle + angle;
-        
-        const platformColor = platformColors[platform.toLowerCase() as keyof typeof platformColors] || colors.info;
-        
-        // Draw pie segment
-        pdf.setFillColor(platformColor);
-        pdf.sector(centerX, centerY, radius, startAngle, endAngle, 'F');
-        
-        // Calculate position for label
-        const midAngle = startAngle + angle / 2;
-        platformLabels.push([platform, midAngle]);
-        
-        startAngle = endAngle;
-      });
-      
-      // Add platform labels with modern styling
+      // Add platform legend with modern styling
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
       
-      const legendX = 90;
-      const legendY = metricY + 45;
+      const legendX = 60;
+      const legendY = metricY + 50;
       
+      let legendYPos = legendY;
       Object.entries(platforms).forEach(([platform, count], idx) => {
-        const y = legendY + idx * 10;
-        const platformColor = platformColors[platform.toLowerCase() as keyof typeof platformColors] || colors.info;
+        const y = legendYPos;
+        legendYPos += 10;
+        
+        const platformColor = platformColors[platform as keyof typeof platformColors] || colors.info;
         
         pdf.setFillColor(platformColor);
-        pdf.roundedRect(legendX, y - 4, 8, 8, 1, 1, 'F');
+        pdf.rect(legendX, y - 4, 8, 8, 'F');
         
         pdf.setTextColor(colors.dark);
         pdf.text(`${platform} (${count})`, legendX + 12, y);
+        
+        // Draw a horizontal bar for each platform
+        const platformBarWidth = 60;
+        const platformBarHeight = 6;
+        const totalPlatforms = Object.values(platforms).reduce((sum, val) => sum + val, 0);
+        const platformBarLength = (count / totalPlatforms) * platformBarWidth;
+        
+        pdf.setFillColor('#f1f5f9');
+        pdf.rect(150, y - 4, platformBarWidth, platformBarHeight, 'F');
+        
+        pdf.setFillColor(platformColor);
+        pdf.rect(150, y - 4, platformBarLength, platformBarHeight, 'F');
       });
       
       // Tactics section
@@ -406,7 +374,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       
       pdf.setFillColor('#ffffff');
       pdf.setDrawColor(colors.tableBorder);
-      pdf.roundedRect(15, tacticsY, pageWidth - 30, 80, 3, 3, 'FD');
+      pdf.rect(15, tacticsY, pageWidth - 30, 80, 'FD');
       
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
@@ -442,20 +410,19 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         
         // Empty bar background
         pdf.setFillColor('#f1f5f9');
-        pdf.roundedRect(tacticsBarX, y, tacticsBarWidth, tacticsBarHeight, 2, 2, 'F');
+        pdf.rect(tacticsBarX, y, tacticsBarWidth, tacticsBarHeight, 'F');
         
-        // Filled bar with gradient
+        // Filled bar with solid color
         const fillWidth = (count / tacticsTotal) * tacticsBarWidth;
-        addGradient(`tacticGradient${index}`, tacticsBarX, y, tacticsBarX + fillWidth, y, 
-          [tacticColors[index % tacticColors.length], tacticColors[(index + 1) % tacticColors.length]]);
-        pdf.roundedRect(tacticsBarX, y, fillWidth, tacticsBarHeight, 2, 2, 'F');
+        pdf.setFillColor(tacticColors[index % tacticColors.length]);
+        pdf.rect(tacticsBarX, y, fillWidth, tacticsBarHeight, 'F');
         
         // Count and percentage
         pdf.setFont('helvetica', 'bold');
         pdf.text(`${count} (${Math.round((count / tacticsTotal) * 100)}%)`, tacticsBarX + tacticsBarWidth + 5, y + 4);
       });
       
-      // Footer with gradient
+      // Footer with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
       pdf.setTextColor(255, 255, 255);
@@ -465,7 +432,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // ----- Host Details Page -----
       pdf.addPage();
       
-      // Header with gradient
+      // Header with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 20, 'F');
       pdf.setTextColor(colors.headerText);
@@ -488,7 +455,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         startY: 30,
         theme: 'grid',
         headStyles: {
-          fillColor: [colors.headerBg.slice(1)].map(c => parseInt(c.substring(0, 2), 16))[0],
+          fillColor: [30, 41, 59],
           textColor: [255, 255, 255],
           fontStyle: 'bold',
           cellPadding: 4,
@@ -508,20 +475,6 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
           0: { fontStyle: 'bold' },
           1: { cellWidth: 25 },
           2: { cellWidth: 40 },
-        },
-        didDrawCell: (data) => {
-          // Add rounded corners to cells in the first and last row
-          if (data.row.index === 0 && data.column.index === 0) {
-            const x = data.cell.x;
-            const y = data.cell.y;
-            const w = data.column.width;
-            const h = data.row.height;
-            pdf.setDrawColor(203, 213, 225);
-            pdf.setLineWidth(0.1);
-            pdf.line(x, y + h, x, y + 3);
-            pdf.line(x, y, x + 3, y);
-            pdf.setDrawColor(0);
-          }
         }
       });
       
@@ -537,9 +490,9 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // Add modern card background
       pdf.setFillColor('#ffffff');
       pdf.setDrawColor(colors.tableBorder);
-      pdf.roundedRect(15, hostChartsY + 5, pageWidth - 30, 130, 3, 3, 'FD');
+      pdf.rect(15, hostChartsY + 5, pageWidth - 30, 130, 'FD');
       
-      // Horizontal bar chart for commands per host with gradients
+      // Horizontal bar chart for commands per host with solid colors
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
       
@@ -567,20 +520,12 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         
         // Empty bar background
         pdf.setFillColor('#f1f5f9');
-        pdf.roundedRect(70, y, hostBarMaxWidth, hostBarHeight, 2, 2, 'F');
+        pdf.rect(70, y, hostBarMaxWidth, hostBarHeight, 'F');
         
-        // Gradient bar fill
+        // Solid bar fill
         const width = (count / maxHostCommands) * hostBarMaxWidth;
-        
-        // Create gradient based on count (higher count = more intense color)
-        const intensity = Math.min(0.5 + count / maxHostCommands * 0.5, 1);
-        addGradient(`hostGradient${idx}`, 70, y, 70 + width, y, 
-          [
-            `rgba(${59 + idx * 5}, ${130 - idx * 5}, ${246}, ${intensity})`,
-            `rgba(${37 + idx * 5}, ${99 - idx * 5}, ${235}, ${intensity})`
-          ]
-        );
-        pdf.roundedRect(70, y, width, hostBarHeight, 2, 2, 'F');
+        pdf.setFillColor(59 + idx * 5, 130 - idx * 5, 246);
+        pdf.rect(70, y, width, hostBarHeight, 'F');
         
         // Count label
         pdf.setFont('helvetica', 'bold');
@@ -597,7 +542,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // Add modern card background
       pdf.setFillColor('#ffffff');
       pdf.setDrawColor(colors.tableBorder);
-      pdf.roundedRect(15, platformY + 5, pageWidth - 30, 70, 3, 3, 'FD');
+      pdf.rect(15, platformY + 5, pageWidth - 30, 70, 'FD');
       
       // Command execution by platform stats with modern styling
       const platformStats = getCommandsByPlatform();
@@ -628,32 +573,20 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         
         // Background bar
         pdf.setFillColor('#f1f5f9');
-        pdf.roundedRect(70, y, platformBarMaxWidth, platformBarHeight, 3, 3, 'F');
+        pdf.rect(70, y, platformBarMaxWidth, platformBarHeight, 'F');
         
-        // Success portion
+        // Success portion with solid color
         const successWidth = (stats.successful / total) * platformBarMaxWidth;
+        pdf.setFillColor('#22c55e');
+        pdf.rect(70, y, successWidth, platformBarHeight, 'F');
         
-        // Gradient fill for success portion
-        addGradient(`platformSuccessGradient${idx}`, 70, y, 70 + successWidth, y, 
-          ['#86efac', '#22c55e']);
-        
-        pdf.roundedRect(70, y, successWidth, platformBarHeight, {
-          tl: 3, tr: 0, br: 0, bl: 3
-        }, 'F');
-        
-        // Failure portion
+        // Failure portion with solid color
         const failureWidth = platformBarMaxWidth - successWidth;
-        
-        // Gradient fill for failure portion
-        addGradient(`platformFailureGradient${idx}`, 70 + successWidth, y, 70 + platformBarMaxWidth, y, 
-          ['#fca5a5', '#ef4444']);
-        
-        pdf.roundedRect(70 + successWidth, y, failureWidth, platformBarHeight, {
-          tl: 0, tr: 3, br: 3, bl: 0
-        }, 'F');
+        pdf.setFillColor('#ef4444');
+        pdf.rect(70 + successWidth, y, failureWidth, platformBarHeight, 'F');
       });
       
-      // Footer with gradient
+      // Footer with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
       pdf.setTextColor(255, 255, 255);
@@ -663,7 +596,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // ----- Tactics and Techniques Page -----
       pdf.addPage();
       
-      // Header with gradient
+      // Header with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 20, 'F');
       pdf.setTextColor(colors.headerText);
@@ -674,7 +607,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // Add modern card background
       pdf.setFillColor('#ffffff');
       pdf.setDrawColor(colors.tableBorder);
-      pdf.roundedRect(15, 25, pageWidth - 30, 190, 3, 3, 'FD');
+      pdf.rect(15, 25, pageWidth - 30, 190, 'FD');
       
       // Collect all unique techniques
       const techniques = new Set<string>();
@@ -708,7 +641,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         startY: 35,
         theme: 'grid',
         headStyles: {
-          fillColor: [colors.headerBg.slice(1)].map(c => parseInt(c.substring(0, 2), 16))[0],
+          fillColor: [30, 41, 59],
           textColor: [255, 255, 255],
           fontStyle: 'bold',
           cellPadding: 4
@@ -728,7 +661,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         }
       });
       
-      // Footer with gradient
+      // Footer with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
       pdf.setTextColor(255, 255, 255);
@@ -738,7 +671,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // ----- Command Execution Timeline -----
       pdf.addPage();
       
-      // Header with gradient
+      // Header with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), 20, 'F');
       pdf.setTextColor(colors.headerText);
@@ -749,7 +682,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
       // Add modern card background
       pdf.setFillColor('#ffffff');
       pdf.setDrawColor(colors.tableBorder);
-      pdf.roundedRect(15, 25, pageWidth - 30, pdf.internal.pageSize.getHeight() - 55, 3, 3, 'FD');
+      pdf.rect(15, 25, pageWidth - 30, pdf.internal.pageSize.getHeight() - 55, 'FD');
       
       // Get all steps and sort by time
       const allStepsSorted = getAllSteps().sort((a, b) => 
@@ -778,7 +711,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         startY: 35,
         theme: 'grid',
         headStyles: {
-          fillColor: [colors.headerBg.slice(1)].map(c => parseInt(c.substring(0, 2), 16))[0],
+          fillColor: [30, 41, 59],
           textColor: [255, 255, 255],
           fontStyle: 'bold',
           cellPadding: 4
@@ -813,7 +746,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
         }
       });
       
-      // Footer with gradient
+      // Footer with solid color
       pdf.setFillColor(colors.headerBg);
       pdf.rect(0, pdf.internal.pageSize.getHeight() - 20, pageWidth, 20, 'F');
       pdf.setTextColor(255, 255, 255);
@@ -826,7 +759,7 @@ const ExportPDF: React.FC<ExportPDFProps> = ({ data }) => {
 
       toast({
         title: "Professional Report Generated",
-        description: "Your detailed PDF report with modern visualizations has been successfully downloaded.",
+        description: "Your detailed PDF report has been successfully downloaded.",
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
