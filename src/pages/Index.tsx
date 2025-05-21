@@ -1,55 +1,75 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
-import Dashboard from '@/components/Dashboard';
-import { supabase } from '@/integrations/supabase/client';
-import { ReconData } from '@/types/reconTypes';
-import { adaptToHostGroup, SimplifiedHostGroup } from '@/types/hostGroupTypes';
-
-// Import the sample data correctly
-import { sampleReconData } from '@/data/sampleData';
+import React, { useState } from 'react';
+import Header from '../components/Header';
+import Dashboard from '../components/Dashboard';
+import HostCard from '../components/HostCard';
+import CommandsList from '../components/CommandsList';
+import TacticsSummary from '../components/TacticsSummary';
+import Timeline from '../components/Timeline';
+import FileUpload from '../components/FileUpload';
+import ExportPDF from '../components/ExportPDF';
+import { sampleReconData } from '../data/sampleData';
+import { ReconData, Objectives } from '../types/reconTypes';
+import { Server } from 'lucide-react';
 
 const Index = () => {
-  const navigate = useNavigate();
+  // Initialize with sample data, ensuring all required properties match their types
   const [data, setData] = useState<ReconData>({
     ...sampleReconData,
-    // Convert the simplified host groups to full host groups
-    host_group: (sampleReconData.host_group as SimplifiedHostGroup[]).map(
-      hostGroup => adaptToHostGroup(hostGroup)
-    )
+    jitter: "0", // Changed from number to string to match ReconData interface
+    objectives: {
+      id: "sample-objective-1",
+      name: "Sample Objective",
+      description: "Default objective for demonstration",
+      goals: [],
+      percentage: 0
+    }, // Properly structured objectives object
+    skipped_abilities: []
   });
-  
-  useEffect(() => {
-    // Check if user is authenticated
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/login');
-      }
-    };
-    
-    checkAuth();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session && event === 'SIGNED_OUT') {
-        navigate('/login');
-      }
-    });
-    
-    // Clean up subscription
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+
+  const handleDataUpload = (newData: ReconData) => {
+    setData(newData);
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       <Header />
-      <main className="flex-1">
+      <main className="container mx-auto py-6 px-4">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
+          <FileUpload onDataLoad={handleDataUpload} />
+          <ExportPDF data={data} />
+        </div>
+        
         <Dashboard data={data} />
+        
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center">
+            <Server className="mr-2 h-6 w-6 text-primary" />
+            Compromised Hosts ({data.host_group.length})
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            {data.host_group.map((host) => (
+              <HostCard key={host.paw} host={host} />
+            ))}
+          </div>
+        </div>
+        
+        <CommandsList steps={data.steps} />
+        
+        <TacticsSummary steps={data.steps} />
+        
+        <Timeline 
+          steps={data.steps} 
+          startTime={data.start} 
+          endTime={data.finish} 
+        />
       </main>
+      
+      <footer className="bg-card border-t border-border py-4">
+        <div className="container mx-auto text-center text-sm text-muted-foreground">
+          Recon Data Explorer © {new Date().getFullYear()} | Security Operations Dashboard
+        </div>
+      </footer>
     </div>
   );
 };
