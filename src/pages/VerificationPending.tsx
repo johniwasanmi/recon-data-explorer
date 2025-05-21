@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
@@ -13,16 +12,11 @@ const VerificationPending = () => {
       subtitle="We've sent you a verification link"
     >
       <div className="text-center space-y-6">
-        <motion.div 
-          className="flex justify-center"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="flex justify-center animate-fade-in">
           <div className="bg-primary/10 rounded-full p-6">
             <Mail className="h-12 w-12 text-primary" />
           </div>
-        </motion.div>
+        </div>
         
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">

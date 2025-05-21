@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -55,16 +54,11 @@ const ResetPassword = () => {
         subtitle="We've sent you a password reset link"
       >
         <div className="text-center space-y-6">
-          <motion.div 
-            className="flex justify-center"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="flex justify-center animate-fade-in">
             <div className="bg-primary/10 rounded-full p-6">
               <Mail className="h-12 w-12 text-primary" />
             </div>
-          </motion.div>
+          </div>
           
           <p className="text-sm text-muted-foreground">
             We've sent a password reset link to <strong>{email}</strong>. 
@@ -113,11 +107,7 @@ const ResetPassword = () => {
         >
           {loading ? (
             <>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"
-              />
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
               Sending reset link...
             </>
           ) : (

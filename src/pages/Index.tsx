@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -19,20 +18,8 @@ const Index = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   
-  // Initialize with sample data, properly typed with the adaptToHostGroup helper
-  const [data, setData] = useState<ReconData>({
-    ...sampleReconData,
-    jitter: "0",
-    objectives: {
-      id: "sample-objective-1",
-      name: "Sample Objective",
-      description: "Default objective for demonstration",
-      goals: [],
-      percentage: 0
-    },
-    host_group: sampleReconData.host_group.map(adaptToHostGroup),
-    skipped_abilities: []
-  });
+  // Initialize with sample data, with proper type casting
+  const [data, setData] = useState<ReconData>(sampleReconData);
 
   useEffect(() => {
     const checkAuth = async () => {

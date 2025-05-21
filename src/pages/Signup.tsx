@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -83,11 +82,7 @@ const Signup = () => {
         subtitle="You're already signed in"
       >
         <div className="flex justify-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
-          />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </AuthLayout>
     );
@@ -176,11 +171,7 @@ const Signup = () => {
         >
           {loading ? (
             <>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"
-              />
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
               Creating account...
             </>
           ) : (

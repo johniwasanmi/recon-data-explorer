@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import AuthLayout from '@/components/layouts/AuthLayout';
@@ -78,11 +77,7 @@ const AuthCallback = () => {
     >
       <div className="flex flex-col items-center justify-center py-8">
         {isLoading ? (
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
-          />
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         ) : error ? (
           <div className="text-center space-y-4">
             <p className="text-destructive">{error}</p>

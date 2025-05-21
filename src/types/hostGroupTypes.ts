@@ -32,7 +32,7 @@ export function adaptToHostGroup(simplified: SimplifiedHostGroup): HostGroup {
     ppid: 0,
     trusted: false,
     executors: [],
-    privilege_level: 0,
+    // Removed the incorrect property: privilege_level
     exe_name: '',
     host_status: 'active',
     last_seen: '',
